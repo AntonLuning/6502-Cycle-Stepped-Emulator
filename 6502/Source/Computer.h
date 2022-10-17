@@ -8,7 +8,7 @@
 constexpr uint32_t MAX_MEMORY = 64 * 1024;
 
 // Little endian (least-significant byte at the smallest address)
-// 0x0200 -> 0xFFFA	: General purpose
+// 0x0200 -> 0xFFFA	: General purpose or I/O
 // 
 // --- SRAM -----------------------------------------------------------------
 // 0x0000 -> 0x00FF (256 bytes): Zero Page (reserved for faster instructions)
@@ -28,16 +28,13 @@ public:
 	Memory SRAM;
 	Memory EEPROM;
 
-	// TODO: I/O?
+	// TODO: I/O
+	// Display display;
 
 public:
 	Computer(uint32_t sizeSRAM, uint32_t sizeEEPROM);
 	~Computer() = default;
 
 	void Reset();
-
 	void RunCycle();
-
-private:
-	Memory* GetMemoryWithAddress(const WORD& address);
 };

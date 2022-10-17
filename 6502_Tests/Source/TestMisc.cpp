@@ -6,16 +6,13 @@ TEST_F(MiscTest, CpuCanReset)
 {
 	MCU->CPU.Reset();
 
-	MCU->CPU.StartCycle();
+	MCU->CPU.RunCycle(&MCU->SRAM, &MCU->EEPROM);
 	EXPECT_EQ(MCU->CPU.AddressBus, 0xFFFC);
-	EXPECT_TRUE(MCU->CPU.RWB);
-	EXPECT_FALSE(MCU->CPU.InternalCycle);
+	EXPECT_TRUE(MCU->CPU.DataRead);
 
-	MCU->CPU.FinishCycle();
-	MCU->CPU.StartCycle();
+	MCU->CPU.RunCycle(&MCU->SRAM, &MCU->EEPROM);
 	EXPECT_EQ(MCU->CPU.AddressBus, 0xFFFD);
-	EXPECT_TRUE(MCU->CPU.RWB);
-	EXPECT_FALSE(MCU->CPU.InternalCycle);
+	EXPECT_TRUE(MCU->CPU.DataRead);
 }
 
 TEST_F(MiscTest, MemoryCanGetCorrectSizeAndZeroAddress)

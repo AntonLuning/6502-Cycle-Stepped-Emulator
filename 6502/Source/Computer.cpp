@@ -29,30 +29,5 @@ void Computer::RunCycle()
 		return;
 	clock.WaitForNextCycle();
 
-	CPU.StartCycle();
-	if (!CPU.InternalCycle)
-	{
-		Memory* activeMemory = GetMemoryWithAddress(CPU.AddressBus);
-		if (activeMemory != nullptr)
-		{
-			if (CPU.RWB)
-				CPU.DataBus = activeMemory->ReadByte(CPU.AddressBus);
-			else
-				activeMemory->WriteByte(CPU.AddressBus, CPU.DataBus);
-		}
-		CPU.FinishCycle();
-	}	
-
-	PRINT_CPU("{0} - {1} {2}", Log::WordToHexString(CPU.AddressBus), CPU.RWB ? "\"r\"" : "\"W\"", Log::WordToHexString(CPU.DataBus));
-}
-
-Memory* Computer::GetMemoryWithAddress(const WORD& address)
-{
-	if (SRAM.IsAddressOk(address))
-		return &SRAM;
-	else if (EEPROM.IsAddressOk(address))
-		return &EEPROM;
-
-	LOG_ERROR("Address {0} is outside the accessible SRAM, EEPROM, and I/O!", Log::WordToHexString(address));
-	return nullptr;
+	CPU.RunCycle(&SRAM, &EEPROM);
 }

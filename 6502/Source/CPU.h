@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Base.h"
+#include "Memory.h"
 
 #include <functional>
 #include <queue>
@@ -25,12 +26,6 @@ struct StatusFlags
 
 class CPU
 {
-public:
-	WORD AddressBus;
-	BYTE DataBus;
-	bool RWB;			// Read/Write bit (true if read)
-	bool InternalCycle;
-
 #ifdef DISTRIBUTION_6502
 private:
 #else
@@ -41,23 +36,30 @@ public:
 	StatusFlags PS;		// Program status
 	BYTE A, X, Y;		// Registers (Accumulator, X/Y index)
 
+	WORD AddressBus;
+	BYTE DataBus;
+	bool DataRead;		// Read/Write bit (RWB)
+
 private:
-	bool m_ResetCycle;
 	BYTE m_PCL;
 	WORD m_Calculated;
 	std::queue<std::function<void()>> m_InstructionQueue;
+
+	Memory* m_HandleSRAM = nullptr;
+	Memory* m_HandleEEPROM = nullptr;
 
 public:
 	CPU() = default;
 	~CPU() = default;
 
 	void Reset();
-
-	void StartCycle();
-	void FinishCycle();
-	void RunJob();
+	void RunCycle(Memory* SRAM, Memory* EEPROM);
 
 private:
+	void SetDataBusFromMemory();
+	void WriteMemoryFromDataBus();
+	Memory* GetMemoryWithAddress(const WORD& address);
+
 	void SetInstruction();
 
 	// A		: Accumulator
@@ -74,19 +76,7 @@ private:
 	// zpg,X	: Zeropage, X-indexed
 	// zpg,Y	: Zeropage, Y-indexed
 
-
-
-	void PushEmpty();
-	void PushSetAddressBusWithPC();
-	void PushSetAddressBusWithDataBus();
-	void PushSetAddressBusWithDataBusAndPCL();
-	void PushSetAddressBusWithDataBusAndPCLAndX();
-	void PushSetAddressBusWithCalculated();
-	void PushCalculateAddressWithX();
-	void PushCalculateAddressWithY();
-	void PushSetPCLWithDataBus();
-
-	void PushSetA();
+	void SetA();
 
 	// Instructions
 	void LDAZeroPageX();

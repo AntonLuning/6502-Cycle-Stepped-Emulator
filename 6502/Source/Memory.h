@@ -16,6 +16,7 @@ public:
 
 	void LoadProgram(BYTE program[]);
 	
+	inline bool IsROM() { return m_IsROM; }
 	bool IsAddressOk(const uint32_t& address);
 
 	BYTE ReadByte(const WORD& address);
