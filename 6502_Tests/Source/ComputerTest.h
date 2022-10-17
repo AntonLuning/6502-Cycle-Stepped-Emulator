@@ -50,4 +50,18 @@ protected:
 		MCU->EEPROM.LoadProgram(prg);
 		delete [] prg;
 	}
+
+	uint32_t RunTestProgram()
+	{
+		MCU->clock.Start();
+
+		uint32_t cycles = -3;
+		while (MCU->CPU.DataBus != 0xEA)
+		{
+			cycles++;
+			MCU->RunCycle();
+		}
+
+		return cycles;
+	}
 };

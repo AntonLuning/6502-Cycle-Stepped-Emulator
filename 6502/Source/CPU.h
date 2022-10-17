@@ -63,20 +63,28 @@ private:
 	void SetInstruction();
 
 	// A		: Accumulator
-	// abs		: Absolute
-	// abs,X	: Absolute, X-indexed
-	// abs,Y	: Absolute, Y-indexed
-	// #		: Immediate
+	 //abs		: Absolute
+	 //abs,X	: Absolute, X-indexed
+	 //abs,Y	: Absolute, Y-indexed
+	 //#		: Immediate
 	// impl		: Implied
 	// ind		: Indirect
-	// X,ind	: X-indexed, indirect
-	// ind,Y	: Indirect, Y-indexed
+	 //X,ind	: X-indexed, indirect
+	 //ind,Y	: Indirect, Y-indexed
 	// rel		: Relative
-	// zpg		: Zeropage
-	// zpg,X	: Zeropage, X-indexed
+	 //zpg		: Zeropage
+	 //zpg,X	: Zeropage, X-indexed
 	// zpg,Y	: Zeropage, Y-indexed
 
+	void PushZeroPage();
+	void PushZeroPageX();
+	//void PushZeroPageY();
+	void PushAbsolute();
+	void PushIndirectX();
+	void PushIndirectY();
+
 	void SetA();
+	void StoreA();
 
 	// Instructions
 	void LDAZeroPageX();
