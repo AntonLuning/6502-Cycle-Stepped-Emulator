@@ -19,8 +19,8 @@ TEST_F(ProgramTest, CanRunProgram1)
 		MCU->RunCycle();
 	}
 
-	EXPECT_EQ(MCU->CPU.GetA(), 0x00);
-	EXPECT_EQ(MCU->CPU.GetPS().Z, 1);
-	EXPECT_EQ(MCU->CPU.GetPS().N, 0);
+	EXPECT_EQ(MCU->CPU.A, 0x00);
+	EXPECT_EQ(MCU->CPU.PS.Z, 1);
+	EXPECT_EQ(MCU->CPU.PS.N, 0);
 	EXPECT_EQ(cycles, 5);
 }

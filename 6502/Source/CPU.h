@@ -31,14 +31,20 @@ public:
 	bool RWB;			// Read/Write bit (true if read)
 	bool InternalCycle;
 
+#ifdef DISTRIBUTION_6502
 private:
+#else
+public:
+#endif
 	WORD PC;			// Program counter
 	BYTE SP;			// Stack pointer
 	StatusFlags PS;		// Program status
 	BYTE A, X, Y;		// Registers (Accumulator, X/Y index)
 
+private:
 	bool m_ResetCycle;
-	BYTE m_ResetPCL;
+	BYTE m_PCL;
+	WORD m_Calculated;
 	std::queue<std::function<void()>> m_InstructionQueue;
 
 public:
@@ -51,21 +57,35 @@ public:
 	void FinishCycle();
 	void RunJob();
 
-#ifndef DISTRIBUTION_6502
-	inline WORD GetPC() { return PC; }
-	inline BYTE GetSP() { return SP; }
-	inline StatusFlags GetPS() { return PS; }
-	inline BYTE GetA() { return A; }
-	inline BYTE GetX() { return X; }
-	inline BYTE GetY() { return Y; }
-#endif // !DISTRIBUTION_6502
-
 private:
 	void SetInstruction();
+
+	// A		: Accumulator
+	// abs		: Absolute
+	// abs,X	: Absolute, X-indexed
+	// abs,Y	: Absolute, Y-indexed
+	// #		: Immediate
+	// impl		: Implied
+	// ind		: Indirect
+	// X,ind	: X-indexed, indirect
+	// ind,Y	: Indirect, Y-indexed
+	// rel		: Relative
+	// zpg		: Zeropage
+	// zpg,X	: Zeropage, X-indexed
+	// zpg,Y	: Zeropage, Y-indexed
+
+
 
 	void PushEmpty();
 	void PushSetAddressBusWithPC();
 	void PushSetAddressBusWithDataBus();
+	void PushSetAddressBusWithDataBusAndPCL();
+	void PushSetAddressBusWithDataBusAndPCLAndX();
+	void PushSetAddressBusWithCalculated();
+	void PushCalculateAddressWithX();
+	void PushCalculateAddressWithY();
+	void PushSetPCLWithDataBus();
+
 	void PushSetA();
 
 	// Instructions

@@ -34,9 +34,9 @@ void CPU::FinishCycle()
 	else if (m_ResetCycle)
 	{
 		if (PC == 0xFFFD)
-			m_ResetPCL = DataBus;
+			m_PCL = DataBus;
 		else
-			PC = ((WORD)DataBus << 8) | m_ResetPCL;
+			PC = ((WORD)DataBus << 8) | m_PCL;
 	}
 	else
 		SetInstruction();
@@ -68,10 +68,35 @@ void CPU::SetInstruction()
 			PushSetAddressBusWithDataBus();
 			PushSetA();
 		} break;
+		case INS_LDA_ZPX:	// 4
+		{
+			PushSetAddressBusWithPC();
+			PushEmpty();
+			PushCalculateAddressWithX();
+			PushEmpty();
+			PushSetAddressBusWithCalculated();
+			PushSetA();
+		} break;
+		case INS_LDA_ABS:	// 4
+		{
+			PushSetAddressBusWithPC();
+			PushSetPCLWithDataBus();
+			PushSetAddressBusWithPC();
+			PushEmpty();
+			PushSetAddressBusWithDataBusAndPCL();
+			PushSetA();
+		} break;
+		case INS_LDA_ABSX:	// 4(5)
+		{
+			PushSetAddressBusWithPC();
+			PushSetPCLWithDataBus();
+			PushSetAddressBusWithPC();
+			PushEmpty();
+			PushSetAddressBusWithDataBusAndPCLAndX();
+			PushSetA();
+		} break;
 
-		SWITCH_INS(INS_LDA_ZPX, LDAZeroPageX)	// 4 
-		SWITCH_INS(INS_LDA_ABS, LDAAbsolute)	// 4 
-		SWITCH_INS(INS_LDA_ABSX, LDAAbsoluteX)	// 4(5) 
+		
 		SWITCH_INS(INS_LDA_ABSY, LDAAbsoluteY)	// 4(5) 
 		SWITCH_INS(INS_LDA_INDX, LDAIndirectX)	// 6 
 		SWITCH_INS(INS_LDA_INDY, LDAIndirectY)	// 5(6)
@@ -251,6 +276,72 @@ void CPU::PushSetAddressBusWithDataBus()
 	});
 }
 
+void CPU::PushSetAddressBusWithDataBusAndPCL()
+{
+	m_InstructionQueue.push([&]()
+	{
+		AddressBus = ((WORD)DataBus << 8) | m_PCL;
+		RWB = true;
+		InternalCycle = false;
+	});
+}
+
+void CPU::PushSetAddressBusWithDataBusAndPCLAndX()
+{
+	m_InstructionQueue.push([&]()
+	{
+		if (WORD(m_PCL) + X > 0xFF)
+		{
+			auto oldQueue = m_InstructionQueue;
+			std::queue<std::function<void()>> empty;
+			std::swap(m_InstructionQueue, empty);
+
+			//m_InstructionQueue.
+
+		}
+		else
+		{
+			AddressBus = ((WORD)DataBus << 8) | m_PCL;
+			RWB = true;
+			InternalCycle = false;
+		}
+	});
+}
+
+void CPU::PushSetAddressBusWithCalculated()
+{
+	m_InstructionQueue.push([&]()
+	{
+		AddressBus = m_Calculated;
+		RWB = true;
+		InternalCycle = false;
+	});
+}
+
+void CPU::PushCalculateAddressWithX()
+{
+	m_InstructionQueue.push([&]()
+	{
+		m_Calculated = DataBus + X;
+	});
+}
+
+void CPU::PushCalculateAddressWithY()
+{
+	m_InstructionQueue.push([&]()
+	{
+		m_Calculated = DataBus + Y;
+	});
+}
+
+void CPU::PushSetPCLWithDataBus()
+{
+	m_InstructionQueue.push([&]()
+	{
+		m_PCL = DataBus;
+	});
+}
+
 void CPU::PushSetA()
 {
 	m_InstructionQueue.push([&]()
@@ -261,18 +352,12 @@ void CPU::PushSetA()
 	});
 }
 
+
 // -----------------------------------------------------------------------------
 // ----------------------------- INSTRUCTIONS ----------------------------------
 // -----------------------------------------------------------------------------
 
 
-void CPU::LDAZeroPageX()
-{
-	//	BYTE addressZP = FetchPCByte();
-	//	addressZP += X;
-	//	A = ReadByte(addressZP);
-	//	LDASetStatusFlags();
-}
 
 void CPU::LDAAbsolute()
 {

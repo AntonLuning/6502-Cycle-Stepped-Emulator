@@ -5,8 +5,8 @@
 Computer::Computer(uint32_t sizeSRAM, uint32_t sizeEEPROM)
 	: CPU(), clock()
 {
-	SRAM = Memory(sizeSRAM, 0x0000);
-	EEPROM = Memory(sizeEEPROM, (WORD)(MAX_MEMORY - sizeEEPROM));
+	SRAM = Memory(sizeSRAM, 0x0000, false);
+	EEPROM = Memory(sizeEEPROM, (WORD)(MAX_MEMORY - sizeEEPROM), true);
 
 	LOG_INFO("SRAM initialized with address {0} -> {1} ({2} KB)", Log::WordToHexString((WORD)0), Log::WordToHexString((WORD)(sizeSRAM-1)), sizeSRAM / 1024);
 	LOG_INFO("EEPROM initialized with address {0} -> {1} ({2} KB)", Log::WordToHexString((WORD)(MAX_MEMORY - sizeEEPROM)), Log::WordToHexString((WORD)(MAX_MEMORY-1)), sizeEEPROM / 1024);

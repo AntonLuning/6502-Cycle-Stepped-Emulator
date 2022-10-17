@@ -7,8 +7,9 @@
 class Memory
 {
 public:
-	Memory() : m_Size(0), m_ZeroAddress(0) {}
-	Memory(uint32_t size, WORD zeroAddress) : m_Size(size), m_ZeroAddress(zeroAddress) {}
+	Memory() {}
+	Memory(uint32_t size, WORD zeroAddress, bool isROM)
+		: m_Size(size), m_ZeroAddress(zeroAddress), m_IsROM(isROM) {}
 	~Memory() { delete m_Data; }
 
 	void Reset();
@@ -23,6 +24,7 @@ public:
 	void ChangeMemory(uint32_t size, WORD zeroAddress);
 
 private:
+	bool m_IsROM = true;
 	uint32_t m_Size = 0;
 	WORD m_ZeroAddress = 0;
 	std::vector<BYTE>* m_Data = nullptr;
