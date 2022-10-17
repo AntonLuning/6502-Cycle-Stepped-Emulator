@@ -1,0 +1,10 @@
+# Visual Studio files and folders
+.vs/
+*.sln
+*.vcxproj*
+
+# Binaries
+bin/
+
+# Temp
+6502_Runtime/
