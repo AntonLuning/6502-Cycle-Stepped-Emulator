@@ -25,8 +25,8 @@ class Computer
 public:
 	CPU CPU;
 	Clock clock;
-	Memory SRAM;
-	Memory EEPROM;
+	Memory* SRAM;
+	Memory* EEPROM;
 
 	// TODO: I/O
 	// Display display;

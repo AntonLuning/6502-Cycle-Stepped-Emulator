@@ -47,20 +47,21 @@ protected:
 		prg[0xFFFC - zeroAddress] = zeroAddress & 0xFF;
 		prg[0xFFFD - zeroAddress] = (zeroAddress >> 8);
 
-		MCU->EEPROM.LoadProgram(prg);
+		MCU->EEPROM->LoadProgram(prg);
 		delete [] prg;
 	}
 
-	uint32_t RunTestProgram()
+	int32_t RunTestProgram()
 	{
 		MCU->clock.Start();
 
-		uint32_t cycles = -3;
+		int32_t cycles = -8;	// -8 for reset cycles
 		while (MCU->CPU.DataBus != 0xEA)
 		{
 			cycles++;
 			MCU->RunCycle();
 		}
+		cycles--;	// for last cycle
 
 		return cycles;
 	}

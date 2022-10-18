@@ -3,14 +3,52 @@
 #include "Log.h"
 #include "OperationCodes.h"
 
+CPU::CPU()
+{
+	Reset();
+}
+
 void CPU::Reset()
 {
-	PC = 0xFFFC;
-	SP = 0xFF;
-	PS.Reset();
-	A = X = Y = 0;
+	std::queue<std::function<void()>> emptyQueue;
+	std::swap(m_InstructionQueue, emptyQueue);
 
-	// TODO: run some reset cycles instead
+	m_InstructionQueue.push([&]()
+		{
+			PS.I = 1;
+			SP = 0x00;
+		});
+	m_InstructionQueue.push([&]() {});
+	m_InstructionQueue.push([&]() {});
+	m_InstructionQueue.push([&]()
+		{
+			AddressBus = 0x0100;
+			SetDataBusFromMemory();
+		});
+	m_InstructionQueue.push([&]()
+		{
+			AddressBus = 0x01FF;
+			SetDataBusFromMemory();
+		});
+	m_InstructionQueue.push([&]()
+		{
+			AddressBus = 0x01FE;
+			SetDataBusFromMemory();
+		});
+	m_InstructionQueue.push([&]()
+		{
+			SP = 0xFD;
+			PC = 0xFFFC;
+			AddressBus = PC++;
+			SetDataBusFromMemory();
+			m_PCL = DataBus;
+		});
+	m_InstructionQueue.push([&]()
+		{
+			AddressBus = PC++;
+			SetDataBusFromMemory();
+			PC = ((WORD)DataBus << 8) | m_PCL;
+		});
 }
 
 void CPU::RunCycle(Memory* SRAM, Memory* EEPROM)
@@ -27,13 +65,7 @@ void CPU::RunCycle(Memory* SRAM, Memory* EEPROM)
 	{
 		AddressBus = PC++;	
 		SetDataBusFromMemory();
-
-		if (PC - 1 == 0xFFFC)
-			m_PCL = DataBus;
-		else if (PC - 1 == 0xFFFD)
-			PC = ((WORD)DataBus << 8) | m_PCL;
-		else
-			SetInstruction();
+		SetInstruction();
 	}
 
 	PRINT_CPU("{0} - {1} {2}", Log::WordToHexString(AddressBus), DataRead ? "\"r\"" : "\"W\"", Log::WordToHexString(DataBus));
@@ -87,7 +119,6 @@ void CPU::SetInstruction()
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = PC++;
-					SetDataBusFromMemory();
 					SetA();
 				});
 		} break;
@@ -187,18 +218,116 @@ void CPU::SetInstruction()
 					}
 				});
 		} break;
-
-		SWITCH_INS(INS_LDX_IM, LDXImmediate)	// Immediate
-		SWITCH_INS(INS_LDX_ZP, LDXZeroPage)		// Zero Page
-		SWITCH_INS(INS_LDX_ZPY, LDXZeroPageY)	// Zero Page Y
-		SWITCH_INS(INS_LDX_ABS, LDXAbsolute)	// Absolute
-		SWITCH_INS(INS_LDX_ABSY, LDXAbsoluteY)	// Absolute Y
-		SWITCH_INS(INS_LDY_IM, LDYImmediate)	// Immediate
-		SWITCH_INS(INS_LDY_ZP, LDYZeroPage)		// Zero Page
-		SWITCH_INS(INS_LDY_ZPX, LDYZeroPageX)	// Zero Page X
-		SWITCH_INS(INS_LDY_ABS, LDYAbsolute)	// Absolute
-		SWITCH_INS(INS_LDY_ABSX, LDYAbsoluteX)	// Absolute X
-
+		case INS_LDX_IM:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					SetX();
+				});
+		} break;
+		case INS_LDX_ZP:	// 3
+		{
+			PushZeroPage();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = DataBus;
+					SetX();
+				});
+		} break;
+		case INS_LDX_ZPY:	// 4
+		{
+			PushZeroPageY();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = m_Calculated;
+					SetX();
+				});
+		} break;
+		case INS_LDX_ABS:	// 4
+		{
+			PushAbsolute();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)DataBus << 8) | m_PCL;
+					SetX();
+				});
+		} break;
+		case INS_LDX_ABSY:	// 4(5)
+		{
+			PushAbsolute();
+			m_InstructionQueue.push([&]()
+				{
+					if (WORD(m_PCL) + Y > 0xFF)
+					{
+						m_InstructionQueue.push([&]()
+							{
+								AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+								SetX();
+							});
+					}
+					else
+					{
+						AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+						SetX();
+					}
+				});
+		} break;
+		case INS_LDY_IM:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					SetY();
+				});
+		} break;
+		case INS_LDY_ZP:	// 3
+		{
+			PushZeroPage();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = DataBus;
+					SetY();
+				});
+		} break;
+		case INS_LDY_ZPX:	// 4
+		{
+			PushZeroPageX();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = m_Calculated;
+					SetY();
+				});
+		} break;
+		case INS_LDY_ABS:	// 4
+		{
+			PushAbsolute();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)DataBus << 8) | m_PCL;
+					SetY();
+				});
+		} break;
+		case INS_LDY_ABSX:	// 4(5)
+		{
+			PushAbsolute();
+			m_InstructionQueue.push([&]()
+				{
+					if (WORD(m_PCL) + X > 0xFF)
+					{
+						m_InstructionQueue.push([&]()
+							{
+								AddressBus = (((WORD)DataBus << 8) | m_PCL) + X;
+								SetY();
+							});
+					}
+					else
+					{
+						AddressBus = (((WORD)DataBus << 8) | m_PCL) + X;
+						SetY();
+					}
+				});
+		} break;
 		case INS_STA_ZP:	// 3
 		{
 			PushZeroPage();
@@ -294,15 +423,62 @@ void CPU::SetInstruction()
 						StoreA();
 					}
 				});
+		} break;	
+		case INS_STX_ZP:	// 3
+		{
+			PushZeroPage();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = DataBus;
+					StoreX();
+				});
 		} break;
-	
+		case INS_STX_ZPY:	// 4
+		{
+			PushZeroPageY();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = m_Calculated;
+					StoreX();
+				});
+		} break;
+		case INS_STX_ABS:	// 4
+		{
+			PushAbsolute();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)DataBus << 8) | m_PCL;
+					StoreX();
+				});
+		} break;
+		case INS_STY_ZP:	// 3
+		{
+			PushZeroPage();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = DataBus;
+					StoreY();
+				});
+		} break;
+		case INS_STY_ZPX:	// 4
+		{
+			PushZeroPageX();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = m_Calculated;
+					StoreY();
+				});
+		} break;
+		case INS_STY_ABS:	// 4
+		{
+			PushAbsolute();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)DataBus << 8) | m_PCL;
+					StoreY();
+				});
+		} break;
 
-		SWITCH_INS(INS_STX_ZP, STXZeroPage)		// Zero Page
-		SWITCH_INS(INS_STX_ZPY, STXZeroPageY)	// Zero Page Y
-		SWITCH_INS(INS_STX_ABS, STXAbsolute)	// Absolute
-		SWITCH_INS(INS_STY_ZP, STYZeroPage)		// Zero Page
-		SWITCH_INS(INS_STY_ZPX, STYZeroPageX)	// Zero Page X
-		SWITCH_INS(INS_STY_ABS, STYAbsolute)	// Absolute
 		SWITCH_INS(INS_TAX_IMP, TAXImplied)		// Implied
 		SWITCH_INS(INS_TAY_IMP, TAYImplied)		// Implied
 		SWITCH_INS(INS_TSX_IMP, TSXImplied)		// Implied
@@ -325,6 +501,7 @@ void CPU::SetInstruction()
 		SWITCH_INS(INS_INC_ABSX, INCAbsoluteX)	// Absolute X
 		SWITCH_INS(INS_INX_IMP, INXImplied)		// Implied
 		SWITCH_INS(INS_INY_IMP, INYImplied)		// Implied
+
 		SWITCH_INS(INS_ADC_IM, ADCImmediate)	// Immediate
 		SWITCH_INS(INS_ADC_ZP, ADCZeroPage)		// Zero Page
 		SWITCH_INS(INS_ADC_ZPX, ADCZeroPageX) 	// Zero Page X
@@ -333,6 +510,7 @@ void CPU::SetInstruction()
 		SWITCH_INS(INS_ADC_ABSY, ADCAbsoluteY)	// Absolute Y
 		SWITCH_INS(INS_ADC_INDX, ADCIndirectX)	// Indirect X
 		SWITCH_INS(INS_ADC_INDY, ADCIndirectY)	// Indirect Y
+
 		SWITCH_INS(INS_SBC_IM, SBCImmediate)  	// Immediate
 		SWITCH_INS(INS_SBC_ZP, SBCZeroPage)		// Zero Page
 		SWITCH_INS(INS_SBC_ZPX, SBCZeroPageX) 	// Zero Page X
@@ -385,6 +563,7 @@ void CPU::SetInstruction()
 		SWITCH_INS(INS_ROR_ZPX, RORZeroPageX) 	// Zero Page X
 		SWITCH_INS(INS_ROR_ABS, RORAbsolute)  	// Absolute
 		SWITCH_INS(INS_ROR_ABSX, RORAbsoluteX)	// Absolute X
+
 		SWITCH_INS(INS_CLC_IMP, CLCImplied)		// Implied
 		SWITCH_INS(INS_CLD_IMP, CLDImplied)		// Implied
 		SWITCH_INS(INS_CLI_IMP, CLIImplied)		// Implied
@@ -392,6 +571,7 @@ void CPU::SetInstruction()
 		SWITCH_INS(INS_SEC_IMP, SECImplied)		// Implied
 		SWITCH_INS(INS_SED_IMP, SEDImplied)		// Implied
 		SWITCH_INS(INS_SEI_IMP, SEIImplied)		// Implied
+
 		SWITCH_INS(INS_BCC_REL, BCCImplied)		// Relative
 		SWITCH_INS(INS_BCS_REL, BCSImplied)		// Relative
 		SWITCH_INS(INS_BEQ_REL, BEQImplied)		// Relative
@@ -449,6 +629,19 @@ void CPU::PushZeroPageX()
 	m_InstructionQueue.push([&]()
 		{
 			m_Calculated = (BYTE)(DataBus + X);
+		});
+}
+
+void CPU::PushZeroPageY()
+{
+	m_InstructionQueue.push([&]()
+		{
+			AddressBus = PC++;
+			SetDataBusFromMemory();
+		});
+	m_InstructionQueue.push([&]()
+		{
+			m_Calculated = (BYTE)(DataBus + Y);
 		});
 }
 
@@ -526,109 +719,43 @@ void CPU::StoreA()
 	WriteMemoryFromDataBus();
 }
 
+void CPU::SetX()
+{
+	SetDataBusFromMemory();
+	X = DataBus;
+	PS.Z = X == 0;
+	PS.N = (X & BIT(7)) > 0;
+}
+
+void CPU::StoreX()
+{
+	DataBus = X;
+	WriteMemoryFromDataBus();
+}
+
+void CPU::SetY()
+{
+	SetDataBusFromMemory();
+	Y = DataBus;
+	PS.Z = Y == 0;
+	PS.N = (Y & BIT(7)) > 0;
+}
+
+void CPU::StoreY()
+{
+	DataBus = Y;
+	WriteMemoryFromDataBus();
+}
+
 // -----------------------------------------------------------------------------
 // ----------------------------- INSTRUCTIONS ----------------------------------
 // -----------------------------------------------------------------------------
 
-// STA
 // ADC
 // CLC
 // CLD
-// LDX
 
 
-
-void CPU::STAZeroPage()
-{
-}
-
-void CPU::STAZeroPageX()
-{
-}
-
-void CPU::STAAbsolute()
-{
-}
-
-void CPU::STAAbsoluteX()
-{
-}
-
-void CPU::STAAbsoluteY()
-{
-}
-
-void CPU::STAIndirectX()
-{
-}
-
-void CPU::STAIndirectY()
-{
-}
-
-void CPU::LDXImmediate()
-{
-}
-
-void CPU::LDXZeroPage()
-{
-}
-
-void CPU::LDXZeroPageY()
-{
-}
-
-void CPU::LDXAbsolute()
-{
-}
-
-void CPU::LDXAbsoluteY()
-{
-}
-
-void CPU::STXZeroPage()
-{
-}
-
-void CPU::STXZeroPageY()
-{
-}
-
-void CPU::STXAbsolute()
-{
-}
-
-void CPU::LDYImmediate()
-{
-}
-
-void CPU::LDYZeroPage()
-{
-}
-
-void CPU::LDYZeroPageX()
-{
-}
-
-void CPU::LDYAbsolute()
-{
-}
-
-void CPU::LDYAbsoluteX()
-{
-}
-
-void CPU::STYZeroPage()
-{
-}
-
-void CPU::STYZeroPageX()
-{
-}
-
-void CPU::STYAbsolute()
-{
-}
 
 void CPU::TAXImplied()
 {

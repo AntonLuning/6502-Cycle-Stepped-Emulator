@@ -10,9 +10,9 @@ TEST_F(STATest, STAZeroPage)
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
 	MCU->CPU.A = 0x42;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
-	EXPECT_EQ(MCU->SRAM.ReadByte(0xA8), 0x42);
+	EXPECT_EQ(MCU->SRAM->ReadByte(0xA8), 0x42);
 	EXPECT_EQ(cycles, 3);
 }
 
@@ -25,10 +25,10 @@ TEST_F(STATest, STAZeroPageX)
 	MCU->CPU.A = 0x42;
 	MCU->CPU.X = 0x03;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
-	EXPECT_EQ(MCU->SRAM.ReadByte(0xA8), 0x00);
-	EXPECT_EQ(MCU->SRAM.ReadByte(0xAB), 0x42);
+	EXPECT_EQ(MCU->SRAM->ReadByte(0xA8), 0x00);
+	EXPECT_EQ(MCU->SRAM->ReadByte(0xAB), 0x42);
 	EXPECT_EQ(cycles, 4);
 }
 
@@ -41,10 +41,10 @@ TEST_F(STATest, STAZeroPageXWithZeroPageCrossing)
 	MCU->CPU.A = 0x42;
 	MCU->CPU.X = 0xFF;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
-	EXPECT_EQ(MCU->SRAM.ReadByte(0xA8), 0x00);
-	EXPECT_EQ(MCU->SRAM.ReadByte(0xA7), 0x42);
+	EXPECT_EQ(MCU->SRAM->ReadByte(0xA8), 0x00);
+	EXPECT_EQ(MCU->SRAM->ReadByte(0xA7), 0x42);
 	EXPECT_EQ(cycles, 4);
 }
 
@@ -56,9 +56,9 @@ TEST_F(STATest, STAAbsolute)
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
 	MCU->CPU.A = 0x42;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
-	EXPECT_EQ(MCU->SRAM.ReadByte(0x33A8), 0x42);
+	EXPECT_EQ(MCU->SRAM->ReadByte(0x33A8), 0x42);
 	EXPECT_EQ(cycles, 4);
 }
 
@@ -71,9 +71,9 @@ TEST_F(STATest, STAAbsoluteX)
 	MCU->CPU.A = 0x42;
 	MCU->CPU.X = 0x03;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
-	EXPECT_EQ(MCU->SRAM.ReadByte(0x33AB), 0x42);
+	EXPECT_EQ(MCU->SRAM->ReadByte(0x33AB), 0x42);
 	EXPECT_EQ(cycles, 4);
 }
 
@@ -86,9 +86,9 @@ TEST_F(STATest, STAAbsoluteXWithPageCrossing)
 	MCU->CPU.A = 0x42;
 	MCU->CPU.X = 0xFF;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
-	EXPECT_EQ(MCU->SRAM.ReadByte(0x34A7), 0x42);
+	EXPECT_EQ(MCU->SRAM->ReadByte(0x34A7), 0x42);
 	EXPECT_EQ(cycles, 5);
 }
 
@@ -101,9 +101,9 @@ TEST_F(STATest, STAAbsoluteY)
 	MCU->CPU.A = 0x42;
 	MCU->CPU.Y = 0x03;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
-	EXPECT_EQ(MCU->SRAM.ReadByte(0x33AB), 0x42);
+	EXPECT_EQ(MCU->SRAM->ReadByte(0x33AB), 0x42);
 	EXPECT_EQ(cycles, 4);
 }
 
@@ -116,9 +116,9 @@ TEST_F(STATest, STAAbsoluteYWithPageCrossing)
 	MCU->CPU.A = 0x42;
 	MCU->CPU.Y = 0xFF;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
-	EXPECT_EQ(MCU->SRAM.ReadByte(0x34A7), 0x42);
+	EXPECT_EQ(MCU->SRAM->ReadByte(0x34A7), 0x42);
 	EXPECT_EQ(cycles, 5);
 }
 
@@ -128,14 +128,14 @@ TEST_F(STATest, STAIndirectX)
 		0x81, 0xA8
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
-	MCU->SRAM.WriteByte(0xAA, 0xF7);
-	MCU->SRAM.WriteByte(0xAB, 0x33);
+	MCU->SRAM->WriteByte(0xAA, 0xF7);
+	MCU->SRAM->WriteByte(0xAB, 0x33);
 	MCU->CPU.A = 0x42;
 	MCU->CPU.X = 0x02;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
-	EXPECT_EQ(MCU->SRAM.ReadByte(0x33F7), 0x42);
+	EXPECT_EQ(MCU->SRAM->ReadByte(0x33F7), 0x42);
 	EXPECT_EQ(cycles, 6);
 }
 
@@ -145,14 +145,14 @@ TEST_F(STATest, STAIndirectXWitZeroPageCrossing)
 		0x81, 0xA8
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
-	MCU->SRAM.WriteByte(0xA7, 0xF7);
-	MCU->SRAM.WriteByte(0xA8, 0x33);
+	MCU->SRAM->WriteByte(0xA7, 0xF7);
+	MCU->SRAM->WriteByte(0xA8, 0x33);
 	MCU->CPU.A = 0x42;
 	MCU->CPU.X = 0xFF;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
-	EXPECT_EQ(MCU->SRAM.ReadByte(0x33F7), 0x42);
+	EXPECT_EQ(MCU->SRAM->ReadByte(0x33F7), 0x42);
 	EXPECT_EQ(cycles, 6);
 }
 
@@ -162,14 +162,14 @@ TEST_F(STATest, STAIndirectY)
 		0x91, 0xA8
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
-	MCU->SRAM.WriteByte(0xA8, 0xF7);
-	MCU->SRAM.WriteByte(0xA9, 0x33);
+	MCU->SRAM->WriteByte(0xA8, 0xF7);
+	MCU->SRAM->WriteByte(0xA9, 0x33);
 	MCU->CPU.A = 0x42;
 	MCU->CPU.Y = 0x02;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
-	EXPECT_EQ(MCU->SRAM.ReadByte(0x33F9), 0x42);
+	EXPECT_EQ(MCU->SRAM->ReadByte(0x33F9), 0x42);
 	EXPECT_EQ(cycles, 5);
 }
 
@@ -179,13 +179,13 @@ TEST_F(STATest, STAIndirectYWithPageCrossing)
 		0x91, 0xA8
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
-	MCU->SRAM.WriteByte(0xA8, 0xF7);
-	MCU->SRAM.WriteByte(0xA9, 0x33);
+	MCU->SRAM->WriteByte(0xA8, 0xF7);
+	MCU->SRAM->WriteByte(0xA9, 0x33);
 	MCU->CPU.A = 0x42;
 	MCU->CPU.Y = 0xFF;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
-	EXPECT_EQ(MCU->SRAM.ReadByte(0x34F6), 0x42);
+	EXPECT_EQ(MCU->SRAM->ReadByte(0x34F6), 0x42);
 	EXPECT_EQ(cycles, 6);
 }

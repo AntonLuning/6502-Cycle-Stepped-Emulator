@@ -9,7 +9,7 @@ TEST_F(LDATest, LDAImmediate)
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x42);
 	EXPECT_EQ(MCU->CPU.PS.Z, 0);
@@ -24,7 +24,7 @@ TEST_F(LDATest, LDAImmediateWithNegativeValue)
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
 	
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0xC2);
 	EXPECT_EQ(MCU->CPU.PS.Z, 0);
@@ -39,7 +39,7 @@ TEST_F(LDATest, LDAImmediateWithZeroValue)
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x00);
 	EXPECT_EQ(MCU->CPU.PS.Z, 1);
@@ -53,9 +53,9 @@ TEST_F(LDATest, LDAZeroPage)
 		0xA5, 0xAA
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
-	MCU->SRAM.WriteByte(0xAA, 0xF2);
+	MCU->SRAM->WriteByte(0xAA, 0xF2);
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0xF2);
 	EXPECT_EQ(MCU->CPU.PS.Z, 0);
@@ -69,10 +69,10 @@ TEST_F(LDATest, LDAZeroPageX)
 		0xB5, 0xA8
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
-	MCU->SRAM.WriteByte(0xAA, 0x42);
+	MCU->SRAM->WriteByte(0xAA, 0x42);
 	MCU->CPU.X = 0x02;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x42);
 	EXPECT_EQ(MCU->CPU.PS.Z, 0);
@@ -86,10 +86,10 @@ TEST_F(LDATest, LDAZeroPageXWithZeroPageCrossover)
 		0xB5, 0xA8
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
-	MCU->SRAM.WriteByte(0xA7, 0x42);
+	MCU->SRAM->WriteByte(0xA7, 0x42);
 	MCU->CPU.X = 0xFF;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x42);
 	EXPECT_EQ(MCU->CPU.PS.Z, 0);
@@ -103,9 +103,9 @@ TEST_F(LDATest, LDAAbsolute)
 		0xAD, 0x33, 0x2F
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
-	MCU->SRAM.WriteByte(0x2F33, 0x42);
+	MCU->SRAM->WriteByte(0x2F33, 0x42);
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x42);
 	EXPECT_EQ(MCU->CPU.PS.Z, 0);
@@ -119,10 +119,10 @@ TEST_F(LDATest, LDAAbsoluteX)
 		0xBD, 0x33, 0x2F
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
-	MCU->SRAM.WriteByte(0x2F43, 0x42);
+	MCU->SRAM->WriteByte(0x2F43, 0x42);
 	MCU->CPU.X = 0x10;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x42);
 	EXPECT_EQ(MCU->CPU.PS.Z, 0);
@@ -136,10 +136,10 @@ TEST_F(LDATest, LDAAbsoluteXWithPageCrosing)
 		0xBD, 0x33, 0x2F
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
-	MCU->SRAM.WriteByte(0x3032, 0x42);
+	MCU->SRAM->WriteByte(0x3032, 0x42);
 	MCU->CPU.X = 0xFF;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x42);
 	EXPECT_EQ(MCU->CPU.PS.Z, 0);
@@ -153,10 +153,10 @@ TEST_F(LDATest, LDAAbsoluteY)
 		0xB9, 0x33, 0x2F
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
-	MCU->SRAM.WriteByte(0x2F43, 0x42);
+	MCU->SRAM->WriteByte(0x2F43, 0x42);
 	MCU->CPU.Y = 0x10;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x42);
 	EXPECT_EQ(MCU->CPU.PS.Z, 0);
@@ -170,10 +170,10 @@ TEST_F(LDATest, LDAAbsoluteYWithPageCrosing)
 		0xB9, 0x33, 0x2F
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
-	MCU->SRAM.WriteByte(0x3032, 0x42);
+	MCU->SRAM->WriteByte(0x3032, 0x42);
 	MCU->CPU.Y = 0xFF;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x42);
 	EXPECT_EQ(MCU->CPU.PS.Z, 0);
@@ -187,12 +187,12 @@ TEST_F(LDATest, LDAIndirectX)
 		0xA1, 0x33
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
-	MCU->SRAM.WriteByte(0x0037, 0x56);
-	MCU->SRAM.WriteByte(0x0038, 0x20);
-	MCU->SRAM.WriteByte(0x2056, 0x42);
+	MCU->SRAM->WriteByte(0x0037, 0x56);
+	MCU->SRAM->WriteByte(0x0038, 0x20);
+	MCU->SRAM->WriteByte(0x2056, 0x42);
 	MCU->CPU.X = 0x04;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x42);
 	EXPECT_EQ(MCU->CPU.PS.Z, 0);
@@ -206,12 +206,12 @@ TEST_F(LDATest, LDAIndirectXWithZeroPageCrossover)
 		0xA1, 0x33
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
-	MCU->SRAM.WriteByte(0x0032, 0x56);
-	MCU->SRAM.WriteByte(0x0033, 0x20);
-	MCU->SRAM.WriteByte(0x2056, 0x42);
+	MCU->SRAM->WriteByte(0x0032, 0x56);
+	MCU->SRAM->WriteByte(0x0033, 0x20);
+	MCU->SRAM->WriteByte(0x2056, 0x42);
 	MCU->CPU.X = 0xFF;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x42);
 	EXPECT_EQ(MCU->CPU.PS.Z, 0);
@@ -225,12 +225,12 @@ TEST_F(LDATest, LDAIndirectY)
 		0xB1, 0x33
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
-	MCU->SRAM.WriteByte(0x0033, 0x56);
-	MCU->SRAM.WriteByte(0x0034, 0x20);
-	MCU->SRAM.WriteByte(0x2059, 0x42);
+	MCU->SRAM->WriteByte(0x0033, 0x56);
+	MCU->SRAM->WriteByte(0x0034, 0x20);
+	MCU->SRAM->WriteByte(0x2059, 0x42);
 	MCU->CPU.Y = 0x03;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x42);
 	EXPECT_EQ(MCU->CPU.PS.Z, 0);
@@ -244,12 +244,12 @@ TEST_F(LDATest, LDAIndirectYWithPageCrossing)
 		0xB1, 0x33
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
-	MCU->SRAM.WriteByte(0x0033, 0x56);
-	MCU->SRAM.WriteByte(0x0034, 0x20);
-	MCU->SRAM.WriteByte(0x2155, 0x42);
+	MCU->SRAM->WriteByte(0x0033, 0x56);
+	MCU->SRAM->WriteByte(0x0034, 0x20);
+	MCU->SRAM->WriteByte(0x2155, 0x42);
 	MCU->CPU.Y = 0xFF;
 
-	uint32_t cycles = RunTestProgram();
+	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x42);
 	EXPECT_EQ(MCU->CPU.PS.Z, 0);

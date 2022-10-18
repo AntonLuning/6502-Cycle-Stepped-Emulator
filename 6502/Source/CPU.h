@@ -26,11 +26,7 @@ struct StatusFlags
 
 class CPU
 {
-#ifdef DISTRIBUTION_6502
-private:
-#else
 public:
-#endif
 	WORD PC;			// Program counter
 	BYTE SP;			// Stack pointer
 	StatusFlags PS;		// Program status
@@ -49,7 +45,7 @@ private:
 	Memory* m_HandleEEPROM = nullptr;
 
 public:
-	CPU() = default;
+	CPU();
 	~CPU() = default;
 
 	void Reset();
@@ -62,63 +58,21 @@ private:
 
 	void SetInstruction();
 
-	// A		: Accumulator
-	 //abs		: Absolute
-	 //abs,X	: Absolute, X-indexed
-	 //abs,Y	: Absolute, Y-indexed
-	 //#		: Immediate
-	// impl		: Implied
-	// ind		: Indirect
-	 //X,ind	: X-indexed, indirect
-	 //ind,Y	: Indirect, Y-indexed
-	// rel		: Relative
-	 //zpg		: Zeropage
-	 //zpg,X	: Zeropage, X-indexed
-	// zpg,Y	: Zeropage, Y-indexed
-
 	void PushZeroPage();
 	void PushZeroPageX();
-	//void PushZeroPageY();
+	void PushZeroPageY();
 	void PushAbsolute();
 	void PushIndirectX();
 	void PushIndirectY();
 
 	void SetA();
 	void StoreA();
+	void SetX();
+	void StoreX();
+	void SetY();
+	void StoreY();
 
 	// Instructions
-	void LDAZeroPageX();
-	void LDAAbsolute();
-	void LDAAbsoluteX();
-	void LDAAbsoluteY();
-	void LDAIndirectX();
-	void LDAIndirectY();
-	void STAZeroPage();
-	void STAZeroPageX();
-	void STAAbsolute();
-	void STAAbsoluteX();
-	void STAAbsoluteY();
-	void STAIndirectX();
-	void STAIndirectY();
-
-	void LDXImmediate();
-	void LDXZeroPage();
-	void LDXZeroPageY();
-	void LDXAbsolute();
-	void LDXAbsoluteY();
-	void STXZeroPage();
-	void STXZeroPageY();
-	void STXAbsolute();
-
-	void LDYImmediate();
-	void LDYZeroPage();
-	void LDYZeroPageX();
-	void LDYAbsolute();
-	void LDYAbsoluteX();
-	void STYZeroPage();
-	void STYZeroPageX();
-	void STYAbsolute();
-	
 	void TAXImplied();
 	void TAYImplied();
 	void TSXImplied();
