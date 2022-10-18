@@ -7,7 +7,7 @@ TEST_F(MiscTest, CpuCanReset)
 	MCU->CPU.Reset();
 
 	for (int i = 0; i < 7; i++)
-		MCU->CPU.RunCycle(MCU->SRAM, MCU->EEPROM);
+		MCU->RunCycle();
 
 	EXPECT_EQ(MCU->CPU.AddressBus, 0xFFFC);
 	EXPECT_TRUE(MCU->CPU.DataRead);

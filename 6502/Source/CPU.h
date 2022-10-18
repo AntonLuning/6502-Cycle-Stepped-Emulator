@@ -162,14 +162,6 @@ private:
 	void RORAbsolute();
 	void RORAbsoluteX();
 
-	void CLCImplied();
-	void CLDImplied();
-	void CLIImplied();
-	void CLVImplied();
-	void SECImplied();
-	void SEDImplied();
-	void SEIImplied();
-
 	void BCCImplied();
 	void BCSImplied();
 	void BEQImplied();

@@ -564,13 +564,55 @@ void CPU::SetInstruction()
 		SWITCH_INS(INS_ROR_ABS, RORAbsolute)  	// Absolute
 		SWITCH_INS(INS_ROR_ABSX, RORAbsoluteX)	// Absolute X
 
-		SWITCH_INS(INS_CLC_IMP, CLCImplied)		// Implied
-		SWITCH_INS(INS_CLD_IMP, CLDImplied)		// Implied
-		SWITCH_INS(INS_CLI_IMP, CLIImplied)		// Implied
-		SWITCH_INS(INS_CLV_IMP, CLVImplied)		// Implied
-		SWITCH_INS(INS_SEC_IMP, SECImplied)		// Implied
-		SWITCH_INS(INS_SED_IMP, SEDImplied)		// Implied
-		SWITCH_INS(INS_SEI_IMP, SEIImplied)		// Implied
+		case INS_CLC_IMP:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					PS.C = 0;
+				});
+		} break;
+		case INS_CLD_IMP:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					PS.D = 0;
+				});
+		} break;
+		case INS_CLI_IMP:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					PS.I = 0;
+				});
+		} break;
+		case INS_CLV_IMP:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					PS.V = 0;
+				});
+		} break;
+		case INS_SEC_IMP:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					PS.C = 1;
+				});
+		} break;
+		case INS_SED_IMP:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					PS.D = 1;
+				});
+		} break;
+		case INS_SEI_IMP:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					PS.I = 1;
+				});
+		} break;
 
 		SWITCH_INS(INS_BCC_REL, BCCImplied)		// Relative
 		SWITCH_INS(INS_BCS_REL, BCSImplied)		// Relative
@@ -1082,34 +1124,6 @@ void CPU::RORAbsolute()
 }
 
 void CPU::RORAbsoluteX()
-{
-}
-
-void CPU::CLCImplied()
-{
-}
-
-void CPU::CLDImplied()
-{
-}
-
-void CPU::CLIImplied()
-{
-}
-
-void CPU::CLVImplied()
-{
-}
-
-void CPU::SECImplied()
-{
-}
-
-void CPU::SEDImplied()
-{
-}
-
-void CPU::SEIImplied()
 {
 }
 
