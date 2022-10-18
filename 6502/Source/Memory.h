@@ -7,14 +7,13 @@
 class Memory
 {
 public:
-	Memory() {}
-	Memory(uint32_t size, WORD zeroAddress, bool isROM)
-		: m_Size(size), m_ZeroAddress(zeroAddress), m_IsROM(isROM) {}
-	~Memory() { delete m_Data; }
+	Memory(uint32_t size, WORD zeroAddress, bool isROM);
+	~Memory();
 
 	void Reset();
 
-	void LoadProgram(BYTE program[]);
+	void LoadProgram(BYTE program[]);	// TEMP
+	void LoadProgram(const char* filepath);
 	
 	inline bool IsROM() { return m_IsROM; }
 	bool IsAddressOk(const uint32_t& address);
