@@ -72,4 +72,5 @@ private:
 	void SetY();
 	void StoreY();
 	void AddA();
+	void SubA();
 };

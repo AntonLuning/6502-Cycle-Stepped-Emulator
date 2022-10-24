@@ -1,7 +1,11 @@
   .org $c000
 reset:
-  lda #$ff
-  sta $3002
+  lda #$42
+  sta $62
+  lda #$33
+  clc
+  adc $62
+  sta $3320
   
   nop
 

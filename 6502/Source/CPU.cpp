@@ -595,13 +595,118 @@ void CPU::LoadInstruction()
 						m_InstructionQueue.push([&]()
 							{
 								AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
-								SetA();
+								AddA();
 							});
 					}
 					else
 					{
 						AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
 						AddA();
+					}
+				});
+		} break;
+
+		case INS_SBC_IM:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					SubA();
+				});
+		} break;
+		case INS_SBC_ZP:	// 3
+		{
+			PushZeroPage();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = DataBus;
+					SubA();
+				});
+		} break;
+		case INS_SBC_ZPX:	// 4
+		{
+			PushZeroPageX();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = m_Calculated;
+					SubA();
+				});
+		} break;
+		case INS_SBC_ABS:	// 4
+		{
+			PushAbsolute();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)DataBus << 8) | m_PCL;
+					SubA();
+				});
+		} break;
+		case INS_SBC_ABSX:	// 4(5)
+		{
+			PushAbsolute();
+			m_InstructionQueue.push([&]()
+				{
+					if (WORD(m_PCL) + X > 0xFF)
+					{
+						m_InstructionQueue.push([&]()
+							{
+								AddressBus = (((WORD)DataBus << 8) | m_PCL) + X;
+								SubA();
+							});
+					}
+					else
+					{
+						AddressBus = (((WORD)DataBus << 8) | m_PCL) + X;
+						SubA();
+					}
+				});
+		} break;
+		case INS_SBC_ABSY:	// 4(5)
+		{
+			PushAbsolute();
+			m_InstructionQueue.push([&]()
+				{
+					if (WORD(m_PCL) + Y > 0xFF)
+					{
+						m_InstructionQueue.push([&]()
+							{
+								AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+								SubA();
+							});
+					}
+					else
+					{
+						AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+						SubA();
+					}
+				});
+		} break;
+		case INS_SBC_INDX:	// 6
+		{
+			PushIndirectX();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)DataBus << 8) | m_PCL;
+					SubA();
+				});
+		} break;
+		case INS_SBC_INDY:	// 5(6)
+		{
+			PushIndirectY();
+			m_InstructionQueue.push([&]()
+				{
+					if (WORD(m_PCL) + Y > 0xFF)
+					{
+						m_InstructionQueue.push([&]()
+							{
+								AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+								SubA();
+							});
+					}
+					else
+					{
+						AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+						SubA();
 					}
 				});
 		} break;
@@ -888,12 +993,24 @@ void CPU::AddA()
 {
 	// TODO: Handle if decimal flag is set
 	SetDataBusFromMemory();
-	int16_t result = A + DataBus + PS.C;
-	BYTE oldA = A;
+	int16_t result = A + PS.C + DataBus;
 
+	PS.V = ((A ^ result) & (DataBus ^ result) & BIT(7)) > 0;
 	A = (result & 0xFF);
 	PS.C = (result & 0xFF00) > 0;
 	PS.Z = A == 0;
 	PS.N = (A & BIT(7)) > 0;
-	PS.V = !((oldA ^ DataBus) & BIT(7)) && (A ^ DataBus) & BIT(7);
+}
+
+void CPU::SubA()
+{
+	// TODO: Handle if decimal flag is set
+	SetDataBusFromMemory();
+	int16_t result = (A | (PS.C & BIT(8))) - DataBus;
+	
+	PS.V = ((A ^ result) & ((0xFF - DataBus) ^ result) & BIT(7)) > 0;
+	A = (result & 0xFF);
+	PS.C = (result & BIT(8)) > 0;
+	PS.Z = A == 0;
+	PS.N = (A & BIT(7)) > 0;
 }
