@@ -41,13 +41,14 @@ void CPU::Reset()
 			PC = 0xFFFC;
 			AddressBus = PC++;
 			SetDataBusFromMemory();
-			m_PCL = DataBus;
+			m_ADL = DataBus;
 		});
 	m_InstructionQueue.push([&]()
 		{
-			AddressBus = PC++;
+			AddressBus = PC;
 			SetDataBusFromMemory();
-			PC = ((WORD)DataBus << 8) | m_PCL;
+			m_ADH = DataBus;
+			PC = ((WORD)m_ADH << 8) | m_ADL;
 		});
 }
 
@@ -132,10 +133,10 @@ void CPU::LoadInstruction()
 		} break;
 		case INS_LDA_ZPX:	// 4
 		{
-			PushZeroPageX();
+			PushZeroPageXY();
 			m_InstructionQueue.push([&]()
 				{
-					AddressBus = m_Calculated;
+					AddressBus = (BYTE)(m_BAL + X);
 					SetA();
 				});
 		} break;
@@ -144,46 +145,54 @@ void CPU::LoadInstruction()
 			PushAbsolute();
 			m_InstructionQueue.push([&]()
 				{
-					AddressBus = ((WORD)DataBus << 8) | m_PCL;
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 					SetA();
 				});
 		} break;
 		case INS_LDA_ABSX:	// 4(5)
 		{
-			PushAbsolute();
+			PushAbsoluteXY();
 			m_InstructionQueue.push([&]()
 				{
-					if (WORD(m_PCL) + X > 0xFF)
+					if (WORD(m_BAL) + X > 0xFF)
 					{
 						m_InstructionQueue.push([&]()
 							{
-								AddressBus = (((WORD)DataBus << 8) | m_PCL) + X;
+								m_ADL = m_BAL + X;
+								m_ADH = m_BAH + 1;
+								AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 								SetA();
 							});
 					}
 					else
 					{
-						AddressBus = (((WORD)DataBus << 8) | m_PCL) + X;
+						m_ADL = m_BAL + X;
+						m_ADH = m_BAH;
+						AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 						SetA();
 					}
 				});
 		} break;
 		case INS_LDA_ABSY:	// 4(5)
 		{
-			PushAbsolute();
+			PushAbsoluteXY();
 			m_InstructionQueue.push([&]()
 				{
-					if (WORD(m_PCL) + Y > 0xFF)
+					if (WORD(m_BAL) + Y > 0xFF)
 					{
 						m_InstructionQueue.push([&]()
 							{
-								AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+								m_ADL = m_BAL + Y;
+								m_ADH = m_BAH + 1;
+								AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 								SetA();
 							});
 					}
 					else
 					{
-						AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+						m_ADL = m_BAL + Y;
+						m_ADH = m_BAH;
+						AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 						SetA();
 					}
 				});
@@ -193,7 +202,7 @@ void CPU::LoadInstruction()
 			PushIndirectX();
 			m_InstructionQueue.push([&]()
 				{
-					AddressBus = ((WORD)DataBus << 8) | m_PCL;
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 					SetA();
 				});
 		} break;
@@ -202,21 +211,116 @@ void CPU::LoadInstruction()
 			PushIndirectY();
 			m_InstructionQueue.push([&]()
 				{
-					if (WORD(m_PCL) + Y > 0xFF)
+					if (WORD(m_BAL) + Y > 0xFF)
 					{
 						m_InstructionQueue.push([&]()
 							{
-								AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+								m_ADL = m_BAL + Y;
+								m_ADH = m_BAH + 1;
+								AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 								SetA();
 							});
 					}
 					else
 					{
-						AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+						m_ADL = m_BAL + Y;
+						m_ADH = m_BAH;
+						AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 						SetA();
 					}
 				});
 		} break;
+		case INS_STA_ZP:	// 3
+		{
+			PushZeroPage();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = DataBus;
+					StoreA();
+				});
+		} break;
+		case INS_STA_ZPX:	// 4
+		{
+			PushZeroPageXY();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = (BYTE)(m_BAL + X);
+					StoreA();
+				});
+		} break;
+		case INS_STA_ABS:	// 4
+		{
+			PushAbsolute();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
+					StoreA();
+				});
+		} break;
+		case INS_STA_ABSX:	// 5
+		{
+			PushAbsoluteXY();
+			m_InstructionQueue.push([&]()
+				{
+					m_ADL = m_BAL + X;
+					if (WORD(m_BAL) + X > 0xFF)
+						m_ADH = m_BAH + 1;
+					else
+						m_ADH = m_BAH;
+
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
+				});
+			m_InstructionQueue.push([&]()
+				{
+					StoreA();
+				});
+		} break;
+		case INS_STA_ABSY:	// 5
+		{
+			PushAbsoluteXY();
+			m_InstructionQueue.push([&]()
+				{
+					m_ADL = m_BAL + Y;
+					if (WORD(m_BAL) + Y > 0xFF)
+						m_ADH = m_BAH + 1;
+					else
+						m_ADH = m_BAH;
+
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
+				});
+			m_InstructionQueue.push([&]()
+				{
+					StoreA();
+				});
+		} break;
+		case INS_STA_INDX:	// 6
+		{
+			PushIndirectX();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
+					StoreA();
+				});
+		} break;
+		case INS_STA_INDY:	// 6
+		{
+			PushIndirectY();
+			m_InstructionQueue.push([&]()
+				{
+					m_ADL = m_BAL + Y;
+					if (WORD(m_BAL) + Y > 0xFF)
+						m_ADH = m_BAH + 1;
+					else
+						m_ADH = m_BAH;
+
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
+				});
+			m_InstructionQueue.push([&]()
+				{
+					StoreA();
+				});
+		} break;
+
 		case INS_LDX_IM:	// 2
 		{
 			m_InstructionQueue.push([&]()
@@ -236,10 +340,10 @@ void CPU::LoadInstruction()
 		} break;
 		case INS_LDX_ZPY:	// 4
 		{
-			PushZeroPageY();
+			PushZeroPageXY();
 			m_InstructionQueue.push([&]()
 				{
-					AddressBus = m_Calculated;
+					AddressBus = (BYTE)(m_BAL + Y);
 					SetX();
 				});
 		} break;
@@ -248,26 +352,30 @@ void CPU::LoadInstruction()
 			PushAbsolute();
 			m_InstructionQueue.push([&]()
 				{
-					AddressBus = ((WORD)DataBus << 8) | m_PCL;
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 					SetX();
 				});
 		} break;
 		case INS_LDX_ABSY:	// 4(5)
 		{
-			PushAbsolute();
+			PushAbsoluteXY();
 			m_InstructionQueue.push([&]()
 				{
-					if (WORD(m_PCL) + Y > 0xFF)
+					if (WORD(m_BAL) + Y > 0xFF)
 					{
 						m_InstructionQueue.push([&]()
 							{
-								AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+								m_ADL = m_BAL + Y;
+								m_ADH = m_BAH + 1;
+								AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 								SetX();
 							});
 					}
 					else
 					{
-						AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+						m_ADL = m_BAL + Y;
+						m_ADH = m_BAH;
+						AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 						SetX();
 					}
 				});
@@ -291,10 +399,10 @@ void CPU::LoadInstruction()
 		} break;
 		case INS_LDY_ZPX:	// 4
 		{
-			PushZeroPageX();
+			PushZeroPageXY();
 			m_InstructionQueue.push([&]()
 				{
-					AddressBus = m_Calculated;
+					AddressBus = (BYTE)(m_BAL + X);
 					SetY();
 				});
 		} break;
@@ -303,126 +411,34 @@ void CPU::LoadInstruction()
 			PushAbsolute();
 			m_InstructionQueue.push([&]()
 				{
-					AddressBus = ((WORD)DataBus << 8) | m_PCL;
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 					SetY();
 				});
 		} break;
 		case INS_LDY_ABSX:	// 4(5)
 		{
-			PushAbsolute();
+			PushAbsoluteXY();
 			m_InstructionQueue.push([&]()
 				{
-					if (WORD(m_PCL) + X > 0xFF)
+					if (WORD(m_BAL) + X > 0xFF)
 					{
 						m_InstructionQueue.push([&]()
 							{
-								AddressBus = (((WORD)DataBus << 8) | m_PCL) + X;
+								m_ADL = m_BAL + X;
+								m_ADH = m_BAH + 1;
+								AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 								SetY();
 							});
 					}
 					else
 					{
-						AddressBus = (((WORD)DataBus << 8) | m_PCL) + X;
+						m_ADL = m_BAL + X;
+						m_ADH = m_BAH;
+						AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 						SetY();
 					}
 				});
 		} break;
-		case INS_STA_ZP:	// 3
-		{
-			PushZeroPage();
-			m_InstructionQueue.push([&]()
-				{
-					AddressBus = DataBus;
-					StoreA();
-				});
-		} break;
-		case INS_STA_ZPX:	// 4
-		{
-			PushZeroPageX();
-			m_InstructionQueue.push([&]()
-				{
-					AddressBus = m_Calculated;
-					StoreA();
-				});
-		} break;
-		case INS_STA_ABS:	// 4
-		{
-			PushAbsolute();
-			m_InstructionQueue.push([&]()
-				{
-					AddressBus = ((WORD)DataBus << 8) | m_PCL;
-					StoreA();
-				});
-		} break;
-		case INS_STA_ABSX:	// 4(5)
-		{
-			PushAbsolute();
-			m_InstructionQueue.push([&]()
-				{
-					if (WORD(m_PCL) + X > 0xFF)
-					{
-						m_InstructionQueue.push([&]()
-							{
-								AddressBus = (((WORD)DataBus << 8) | m_PCL) + X;
-								StoreA();
-							});
-					}
-					else
-					{
-						AddressBus = (((WORD)DataBus << 8) | m_PCL) + X;
-						StoreA();
-					}
-				});
-		} break;
-		case INS_STA_ABSY:	// 4(5)
-		{
-			PushAbsolute();
-			m_InstructionQueue.push([&]()
-				{
-					if (WORD(m_PCL) + Y > 0xFF)
-					{
-						m_InstructionQueue.push([&]()
-							{
-								AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
-								StoreA();
-							});
-					}
-					else
-					{
-						AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
-						StoreA();
-					}
-				});
-		} break;
-		case INS_STA_INDX:	// 6
-		{
-			PushIndirectX();
-			m_InstructionQueue.push([&]()
-				{
-					AddressBus = ((WORD)DataBus << 8) | m_PCL;
-					StoreA();
-				});
-		} break;
-		case INS_STA_INDY:	// 5(6)
-		{
-			PushIndirectY();
-			m_InstructionQueue.push([&]()
-				{
-					if (WORD(m_PCL) + Y > 0xFF)
-					{
-						m_InstructionQueue.push([&]()
-							{
-								AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
-								StoreA();
-							});
-					}
-					else
-					{
-						AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
-						StoreA();
-					}
-				});
-		} break;	
 		case INS_STX_ZP:	// 3
 		{
 			PushZeroPage();
@@ -434,10 +450,10 @@ void CPU::LoadInstruction()
 		} break;
 		case INS_STX_ZPY:	// 4
 		{
-			PushZeroPageY();
+			PushZeroPageXY();
 			m_InstructionQueue.push([&]()
 				{
-					AddressBus = m_Calculated;
+					AddressBus = (BYTE)(m_BAL + Y);
 					StoreX();
 				});
 		} break;
@@ -446,7 +462,7 @@ void CPU::LoadInstruction()
 			PushAbsolute();
 			m_InstructionQueue.push([&]()
 				{
-					AddressBus = ((WORD)DataBus << 8) | m_PCL;
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 					StoreX();
 				});
 		} break;
@@ -461,10 +477,10 @@ void CPU::LoadInstruction()
 		} break;
 		case INS_STY_ZPX:	// 4
 		{
-			PushZeroPageX();
+			PushZeroPageXY();
 			m_InstructionQueue.push([&]()
 				{
-					AddressBus = m_Calculated;
+					AddressBus = (BYTE)(m_BAL + X);
 					StoreY();
 				});
 		} break;
@@ -473,18 +489,80 @@ void CPU::LoadInstruction()
 			PushAbsolute();
 			m_InstructionQueue.push([&]()
 				{
-					AddressBus = ((WORD)DataBus << 8) | m_PCL;
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 					StoreY();
 				});
 		} break;
 
-		//SWITCH_INS(INS_TAX_IMP, TAXImplied)		// Implied
-		//SWITCH_INS(INS_TAY_IMP, TAYImplied)		// Implied
-		//SWITCH_INS(INS_TSX_IMP, TSXImplied)		// Implied
-		//SWITCH_INS(INS_TXA_IMP, TXAImplied)		// Implied
-		//SWITCH_INS(INS_TXS_IMP, TXSImplied)		// Implied
-		//SWITCH_INS(INS_TYA_IMP, TYAImplied)		// Implied
-		//SWITCH_INS(INS_PHA_IMP, PHAImplied)		// Implied
+		case INS_TAX_IMP:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					X = A;
+					PS.Z = X == 0;
+					PS.N = (X & BIT(7)) > 0;
+				});
+		} break;
+		case INS_TAY_IMP:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					Y = A;
+					PS.Z = Y == 0;
+					PS.N = (Y & BIT(7)) > 0;
+				});
+		} break;
+		case INS_TSX_IMP:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					X = SP;
+					PS.Z = X == 0;
+					PS.N = (X & BIT(7)) > 0;
+				});
+		} break;
+		case INS_TXA_IMP:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					A = X;
+					PS.Z = A == 0;
+					PS.N = (A & BIT(7)) > 0;
+				});
+		} break;
+		case INS_TXS_IMP:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					SP = X;
+					PS.Z = SP == 0;
+					PS.N = (SP & BIT(7)) > 0;
+				});
+		} break;
+		case INS_TYA_IMP:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					A = Y;
+					PS.Z = A == 0;
+					PS.N = (A & BIT(7)) > 0;
+				});
+		} break;
+
+		case INS_PHA_IMP:	// 3
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC;
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = SP++;
+					DataBus = A;
+					WriteMemoryFromDataBus();
+				});
+		} break;
+
 		//SWITCH_INS(INS_PHP_IMP, PHPImplied)		// Implied
 		//SWITCH_INS(INS_PLA_IMP, PLAImplied)		// Implied
 		//SWITCH_INS(INS_PLP_IMP, PLPImplied)		// Implied
@@ -520,10 +598,10 @@ void CPU::LoadInstruction()
 		} break;
 		case INS_ADC_ZPX:	// 4
 		{
-			PushZeroPageX();
+			PushZeroPageXY();
 			m_InstructionQueue.push([&]()
 				{
-					AddressBus = m_Calculated;
+					AddressBus = (BYTE)(m_BAL + X);
 					AddA();
 				});
 		} break;
@@ -532,46 +610,54 @@ void CPU::LoadInstruction()
 			PushAbsolute();
 			m_InstructionQueue.push([&]()
 				{
-					AddressBus = ((WORD)DataBus << 8) | m_PCL;
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 					AddA();
 				});
 		} break;
 		case INS_ADC_ABSX:	// 4(5)
 		{
-			PushAbsolute();
+			PushAbsoluteXY();
 			m_InstructionQueue.push([&]()
 				{
-					if (WORD(m_PCL) + X > 0xFF)
+					if (WORD(m_BAL) + X > 0xFF)
 					{
 						m_InstructionQueue.push([&]()
 							{
-								AddressBus = (((WORD)DataBus << 8) | m_PCL) + X;
+								m_ADL = m_BAL + X;
+								m_ADH = m_BAH + 1;
+								AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 								AddA();
 							});
 					}
 					else
 					{
-						AddressBus = (((WORD)DataBus << 8) | m_PCL) + X;
+						m_ADL = m_BAL + X;
+						m_ADH = m_BAH;
+						AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 						AddA();
 					}
 				});
 		} break;
 		case INS_ADC_ABSY:	// 4(5)
 		{
-			PushAbsolute();
+			PushAbsoluteXY();
 			m_InstructionQueue.push([&]()
 				{
-					if (WORD(m_PCL) + Y > 0xFF)
+					if (WORD(m_BAL) + Y > 0xFF)
 					{
 						m_InstructionQueue.push([&]()
 							{
-								AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+								m_ADL = m_BAL + Y;
+								m_ADH = m_BAH + 1;
+								AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 								AddA();
 							});
 					}
 					else
 					{
-						AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+						m_ADL = m_BAL + Y;
+						m_ADH = m_BAH;
+						AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 						AddA();
 					}
 				});
@@ -581,7 +667,7 @@ void CPU::LoadInstruction()
 			PushIndirectX();
 			m_InstructionQueue.push([&]()
 				{
-					AddressBus = ((WORD)DataBus << 8) | m_PCL;
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 					AddA();
 				});
 		} break;
@@ -590,17 +676,21 @@ void CPU::LoadInstruction()
 			PushIndirectY();
 			m_InstructionQueue.push([&]()
 				{
-					if (WORD(m_PCL) + Y > 0xFF)
+					if (WORD(m_BAL) + Y > 0xFF)
 					{
 						m_InstructionQueue.push([&]()
 							{
-								AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+								m_ADL = m_BAL + Y;
+								m_ADH = m_BAH + 1;
+								AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 								AddA();
 							});
 					}
 					else
 					{
-						AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+						m_ADL = m_BAL + Y;
+						m_ADH = m_BAH;
+						AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 						AddA();
 					}
 				});
@@ -625,10 +715,10 @@ void CPU::LoadInstruction()
 		} break;
 		case INS_SBC_ZPX:	// 4
 		{
-			PushZeroPageX();
+			PushZeroPageXY();
 			m_InstructionQueue.push([&]()
 				{
-					AddressBus = m_Calculated;
+					AddressBus = (BYTE)(m_BAL + X);
 					SubA();
 				});
 		} break;
@@ -637,46 +727,54 @@ void CPU::LoadInstruction()
 			PushAbsolute();
 			m_InstructionQueue.push([&]()
 				{
-					AddressBus = ((WORD)DataBus << 8) | m_PCL;
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 					SubA();
 				});
 		} break;
 		case INS_SBC_ABSX:	// 4(5)
 		{
-			PushAbsolute();
+			PushAbsoluteXY();
 			m_InstructionQueue.push([&]()
 				{
-					if (WORD(m_PCL) + X > 0xFF)
+					if (WORD(m_BAL) + X > 0xFF)
 					{
 						m_InstructionQueue.push([&]()
 							{
-								AddressBus = (((WORD)DataBus << 8) | m_PCL) + X;
+								m_ADL = m_BAL + X;
+								m_ADH = m_BAH + 1;
+								AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 								SubA();
 							});
 					}
 					else
 					{
-						AddressBus = (((WORD)DataBus << 8) | m_PCL) + X;
+						m_ADL = m_BAL + X;
+						m_ADH = m_BAH;
+						AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 						SubA();
 					}
 				});
 		} break;
 		case INS_SBC_ABSY:	// 4(5)
 		{
-			PushAbsolute();
+			PushAbsoluteXY();
 			m_InstructionQueue.push([&]()
 				{
-					if (WORD(m_PCL) + Y > 0xFF)
+					if (WORD(m_BAL) + Y > 0xFF)
 					{
 						m_InstructionQueue.push([&]()
 							{
-								AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+								m_ADL = m_BAL + Y;
+								m_ADH = m_BAH + 1;
+								AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 								SubA();
 							});
 					}
 					else
 					{
-						AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+						m_ADL = m_BAL + Y;
+						m_ADH = m_BAH;
+						AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 						SubA();
 					}
 				});
@@ -686,7 +784,7 @@ void CPU::LoadInstruction()
 			PushIndirectX();
 			m_InstructionQueue.push([&]()
 				{
-					AddressBus = ((WORD)DataBus << 8) | m_PCL;
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 					SubA();
 				});
 		} break;
@@ -695,17 +793,21 @@ void CPU::LoadInstruction()
 			PushIndirectY();
 			m_InstructionQueue.push([&]()
 				{
-					if (WORD(m_PCL) + Y > 0xFF)
+					if (WORD(m_BAL) + Y > 0xFF)
 					{
 						m_InstructionQueue.push([&]()
 							{
-								AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+								m_ADL = m_BAL + Y;
+								m_ADH = m_BAH + 1;
+								AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 								SubA();
 							});
 					}
 					else
 					{
-						AddressBus = (((WORD)DataBus << 8) | m_PCL) + Y;
+						m_ADL = m_BAL + Y;
+						m_ADH = m_BAH;
+						AddressBus = ((WORD)m_ADH << 8) | m_ADL;
 						SubA();
 					}
 				});
@@ -842,13 +944,18 @@ void CPU::LoadInstruction()
 		//SWITCH_INS(INS_JSR_ABS, JSRAbsolute)	// 6
 		//SWITCH_INS(INS_RTI_IMP, RTIImplied)		// Implied
 		//SWITCH_INS(INS_RTS_IMP, RTSImplied)		// Implied
-		//SWITCH_INS(INS_NOP_IMP, NOPImplied)		// Implied
+
+		case INS_NOP_IMP:	// 2
+		{
+			m_InstructionQueue.push([&]() {});
+		} break;
+
 		//SWITCH_INS(INS_BIT_ZP, BITZeroPage)		// Zero Page
 		//SWITCH_INS(INS_BIT_ABS, BITAbsolute)	// Absolute
 
-	default:
-		LOG_ERROR("Illegal Opcode ({0}), instruction not handled!", Log::WordToHexString(DataBus));
-		break;
+		default:
+			LOG_ERROR("Illegal Opcode ({0}), instruction not handled!", Log::WordToHexString(DataBus));
+			break;
 	}
 }
 
@@ -861,7 +968,7 @@ void CPU::PushZeroPage()
 		});
 }
 
-void CPU::PushZeroPageX()
+void CPU::PushZeroPageXY()
 {
 	m_InstructionQueue.push([&]()
 		{
@@ -870,20 +977,8 @@ void CPU::PushZeroPageX()
 		});
 	m_InstructionQueue.push([&]()
 		{
-			m_Calculated = (BYTE)(DataBus + X);
-		});
-}
-
-void CPU::PushZeroPageY()
-{
-	m_InstructionQueue.push([&]()
-		{
-			AddressBus = PC++;
-			SetDataBusFromMemory();
-		});
-	m_InstructionQueue.push([&]()
-		{
-			m_Calculated = (BYTE)(DataBus + Y);
+			AddressBus = DataBus;
+			m_BAL = DataBus;
 		});
 }
 
@@ -893,12 +988,29 @@ void CPU::PushAbsolute()
 		{
 			AddressBus = PC++;
 			SetDataBusFromMemory();
-			m_PCL = DataBus;
+			m_ADL = DataBus;
 		});
 	m_InstructionQueue.push([&]()
 		{
 			AddressBus = PC++;
 			SetDataBusFromMemory();
+			m_ADH = DataBus;
+		});
+}
+
+void CPU::PushAbsoluteXY()
+{
+	m_InstructionQueue.push([&]()
+		{
+			AddressBus = PC++;
+			SetDataBusFromMemory();
+			m_BAL = DataBus;
+		});
+	m_InstructionQueue.push([&]()
+		{
+			AddressBus = PC++;
+			SetDataBusFromMemory();
+			m_BAH = DataBus;
 		});
 }
 
@@ -908,21 +1020,23 @@ void CPU::PushIndirectX()
 		{
 			AddressBus = PC++;
 			SetDataBusFromMemory();
+			m_BAL = DataBus;
 		});
 	m_InstructionQueue.push([&]()
 		{
-			m_Calculated = (BYTE)(DataBus + X);
+			AddressBus = m_BAL;
 		});
 	m_InstructionQueue.push([&]()
 		{
-			AddressBus = m_Calculated;
+			AddressBus = (BYTE)(m_BAL + X);
 			SetDataBusFromMemory();
-			m_PCL = DataBus;
+			m_ADL = DataBus;
 		});
 	m_InstructionQueue.push([&]()
 		{
-			AddressBus = m_Calculated + 1;
+			AddressBus = (BYTE)(m_BAL + X) + 1;
 			SetDataBusFromMemory();
+			m_ADH = DataBus;
 		});
 }
 
@@ -932,18 +1046,19 @@ void CPU::PushIndirectY()
 		{
 			AddressBus = PC++;
 			SetDataBusFromMemory();
-			m_Calculated = DataBus;
+			m_IAL = DataBus;
 		});
 	m_InstructionQueue.push([&]()
 		{
-			AddressBus = m_Calculated;
+			AddressBus = m_IAL;
 			SetDataBusFromMemory();
-			m_PCL = DataBus;
+			m_BAL = DataBus;
 		});
 	m_InstructionQueue.push([&]()
 		{
-			AddressBus = m_Calculated + 1;
+			AddressBus = m_IAL + 1;
 			SetDataBusFromMemory();
+			m_BAH = DataBus;
 		});
 }
 

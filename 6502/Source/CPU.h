@@ -37,8 +37,9 @@ public:
 	bool DataRead;		// Read/Write bit (RWB)
 
 private:
-	BYTE m_PCL;
-	WORD m_Calculated;
+	BYTE m_BAL, m_BAH;
+	BYTE m_ADL, m_ADH;
+	BYTE m_IAL;
 	std::queue<std::function<void()>> m_InstructionQueue;
 
 	Memory* m_HandleSRAM = nullptr;
@@ -59,9 +60,9 @@ private:
 	void LoadInstruction();
 
 	void PushZeroPage();
-	void PushZeroPageX();
-	void PushZeroPageY();
+	void PushZeroPageXY();
 	void PushAbsolute();
+	void PushAbsoluteXY();
 	void PushIndirectX();
 	void PushIndirectY();
 

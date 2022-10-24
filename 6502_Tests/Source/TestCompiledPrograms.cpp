@@ -63,3 +63,21 @@ TEST_F(CompiledProgramTest, Program3)
 	EXPECT_EQ(cycles, 16);
 }
 
+TEST_F(CompiledProgramTest, Program4)
+{
+	MCU->EEPROM->LoadProgram("C:\\Dev\\6502\\6502_Tests\\TestPrograms\\program4.out");
+	// lda #$90
+	// clc
+	// sbc #$60
+	// sta $3320
+
+	int32_t cycles = RunTestProgram();
+
+	EXPECT_EQ(MCU->CPU.A, 0x30);
+	EXPECT_EQ(MCU->SRAM->ReadByte(0x3320), 0x30);
+	EXPECT_EQ(MCU->CPU.PS.C, 0);
+	EXPECT_EQ(MCU->CPU.PS.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.V, 1);
+	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(cycles, 10);
+}

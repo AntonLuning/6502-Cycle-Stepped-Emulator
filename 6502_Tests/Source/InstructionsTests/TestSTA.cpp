@@ -74,7 +74,7 @@ TEST_F(STATest, STAAbsoluteX)
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->SRAM->ReadByte(0x33AB), 0x42);
-	EXPECT_EQ(cycles, 4);
+	EXPECT_EQ(cycles, 5);
 }
 
 TEST_F(STATest, STAAbsoluteXWithPageCrossing)
@@ -104,7 +104,7 @@ TEST_F(STATest, STAAbsoluteY)
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->SRAM->ReadByte(0x33AB), 0x42);
-	EXPECT_EQ(cycles, 4);
+	EXPECT_EQ(cycles, 5);
 }
 
 TEST_F(STATest, STAAbsoluteYWithPageCrossing)
@@ -170,7 +170,7 @@ TEST_F(STATest, STAIndirectY)
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->SRAM->ReadByte(0x33F9), 0x42);
-	EXPECT_EQ(cycles, 5);
+	EXPECT_EQ(cycles, 6);
 }
 
 TEST_F(STATest, STAIndirectYWithPageCrossing)
