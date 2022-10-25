@@ -222,3 +222,111 @@ TEST_F(IncDecTest, IncDecAbsoluteXWithWrapOverAndPageCrossing)
 	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
 	EXPECT_EQ(MCU->CPU.PS.Bits.N, 1);
 }
+
+TEST_F(IncDecTest, IncXDecX)
+{
+	BYTE program[] = {
+		0xE8, 0xE8, 0xCA
+	};
+	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
+	MCU->CPU.X = 0x07E;
+
+	RunCycles(8);
+	EXPECT_EQ(MCU->CPU.X, 0x7E);
+
+	RunCycles(2);
+	EXPECT_EQ(MCU->CPU.X, 0x7F);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
+
+	RunCycles(2);
+	EXPECT_EQ(MCU->CPU.X, 0x80);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 1);
+
+	RunCycles(2);
+	EXPECT_EQ(MCU->CPU.X, 0x7F);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
+}
+
+TEST_F(IncDecTest, IncXDecXWithWrapOver)
+{
+	BYTE program[] = {
+		0xE8, 0xE8, 0xCA
+	};
+	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
+	MCU->CPU.X = 0x0FE;
+
+	RunCycles(8);
+	EXPECT_EQ(MCU->CPU.X, 0xFE);
+
+	RunCycles(2);
+	EXPECT_EQ(MCU->CPU.X, 0xFF);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 1);
+
+	RunCycles(2);
+	EXPECT_EQ(MCU->CPU.X, 0x00);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 1);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
+
+	RunCycles(2);
+	EXPECT_EQ(MCU->CPU.X, 0xFF);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 1);
+}
+
+TEST_F(IncDecTest, IncYDecY)
+{
+	BYTE program[] = {
+		0xC8, 0xC8, 0x88
+	};
+	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
+	MCU->CPU.Y = 0x07E;
+
+	RunCycles(8);
+	EXPECT_EQ(MCU->CPU.Y, 0x7E);
+
+	RunCycles(2);
+	EXPECT_EQ(MCU->CPU.Y, 0x7F);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
+
+	RunCycles(2);
+	EXPECT_EQ(MCU->CPU.Y, 0x80);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 1);
+
+	RunCycles(2);
+	EXPECT_EQ(MCU->CPU.Y, 0x7F);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
+}
+
+TEST_F(IncDecTest, IncYDecYWithWrapOver)
+{
+	BYTE program[] = {
+		0xC8, 0xC8, 0x88
+	};
+	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
+	MCU->CPU.Y = 0x0FE;
+
+	RunCycles(8);
+	EXPECT_EQ(MCU->CPU.Y, 0xFE);
+
+	RunCycles(2);
+	EXPECT_EQ(MCU->CPU.Y, 0xFF);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 1);
+
+	RunCycles(2);
+	EXPECT_EQ(MCU->CPU.Y, 0x00);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 1);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
+
+	RunCycles(2);
+	EXPECT_EQ(MCU->CPU.Y, 0xFF);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 1);
+}

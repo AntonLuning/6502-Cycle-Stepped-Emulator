@@ -127,6 +127,7 @@ void CPU::LoadInstruction()
 
 	switch (DataBus)
 	{
+#pragma region Transfer_Instructions
 		case INS_LDA_IM:	// 2
 		{
 			m_InstructionQueue.push([&]()
@@ -473,7 +474,9 @@ void CPU::LoadInstruction()
 					PS.Bits.N = (A & BIT(7)) > 0;
 				});
 		} break;
+#pragma endregion Transfer_Instructions
 
+#pragma region PushPull_Instructions
 		case INS_PHA_IMP:	// 3
 		{
 			m_InstructionQueue.push([&]()
@@ -533,7 +536,9 @@ void CPU::LoadInstruction()
 					PS.Byte = DataBus;
 				});
 		} break;
+#pragma endregion PushPull_Instructions
 
+#pragma region DecInc_Instructions
 		case INS_DEC_ZP:	// 5
 		{
 			PushZeroPageModified();
@@ -599,6 +604,45 @@ void CPU::LoadInstruction()
 				});
 		} break;
 
+		case INS_DEX_IMP:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					X--;
+					PS.Bits.Z = X == 0;
+					PS.Bits.N = (X & BIT(7)) > 0;
+				});
+		} break;
+		case INS_INX_IMP:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					X++;
+					PS.Bits.Z = X == 0;
+					PS.Bits.N = (X & BIT(7)) > 0;
+				});
+		} break;
+		case INS_DEY_IMP:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					Y--;
+					PS.Bits.Z = Y == 0;
+					PS.Bits.N = (Y & BIT(7)) > 0;
+				});
+		} break;
+		case INS_INY_IMP:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					Y++;
+					PS.Bits.Z = Y == 0;
+					PS.Bits.N = (Y & BIT(7)) > 0;
+				});
+		} break;
+#pragma endregion DecInc_Instructions
+
+#pragma region Arithmetic_Instructions
 		case INS_ADC_IM:	// 2
 		{
 			m_InstructionQueue.push([&]()
@@ -736,15 +780,9 @@ void CPU::LoadInstruction()
 					EXTRA_CYCLE_CHECK(Y, SubA)
 				});
 		} break;
+#pragma endregion Arithmetic_Instructions
 
-		//SWITCH_INS(INS_SBC_IM, SBCImmediate)  	// Immediate
-		//SWITCH_INS(INS_SBC_ZP, SBCZeroPage)		// Zero Page
-		//SWITCH_INS(INS_SBC_ZPX, SBCZeroPageX) 	// Zero Page X
-		//SWITCH_INS(INS_SBC_ABS, SBCAbsolute)  	// Absolute
-		//SWITCH_INS(INS_SBC_ABSX, SBCAbsoluteX)	// Absolute X
-		//SWITCH_INS(INS_SBC_ABSY, SBCAbsoluteY)	// Absolute Y
-		//SWITCH_INS(INS_SBC_INDX, SBCIndirectX)	// Indirect X
-		//SWITCH_INS(INS_SBC_INDY, SBCIndirectY)	// Indirect Y
+#pragma region Logical_Instructions
 		//SWITCH_INS(INS_AND_IM, ANDImmediate)  	// Immediate
 		//SWITCH_INS(INS_AND_ZP, ANDZeroPage)		// Zero Page
 		//SWITCH_INS(INS_AND_ZPX, ANDZeroPageX)	// Zero Page X
@@ -789,7 +827,9 @@ void CPU::LoadInstruction()
 		//SWITCH_INS(INS_ROR_ZPX, RORZeroPageX) 	// Zero Page X
 		//SWITCH_INS(INS_ROR_ABS, RORAbsolute)  	// Absolute
 		//SWITCH_INS(INS_ROR_ABSX, RORAbsoluteX)	// Absolute X
+#pragma endregion Logical_Instructions
 
+#pragma region Flag_Instructions
 		case INS_CLC_IMP:	// 2
 		{
 			m_InstructionQueue.push([&]()
@@ -846,7 +886,9 @@ void CPU::LoadInstruction()
 					PS.Bits.I = 1;
 				});
 		} break;
+#pragma endregion Flag_Instructions
 
+#pragma region Branch_Instructions
 		//SWITCH_INS(INS_BCC_REL, BCCImplied)		// Relative
 		//SWITCH_INS(INS_BCS_REL, BCSImplied)		// Relative
 		//SWITCH_INS(INS_BEQ_REL, BEQImplied)		// Relative
@@ -869,13 +911,18 @@ void CPU::LoadInstruction()
 		//SWITCH_INS(INS_CPY_IM, CPYImmediate)	// Immediate
 		//SWITCH_INS(INS_CPY_ZP, CPYZeroPage)		// Zero Page
 		//SWITCH_INS(INS_CPY_ABS, CPYAbsolute)	// Absolute
+#pragma endregion Branch_Instructions
+
+#pragma region Jump_Instructions
 		//SWITCH_INS(INS_BRK_IMP, BRKImplied)		// Implied
 		//SWITCH_INS(INS_JMP_ABS, JMPAbsolute)	// Absolute
 		//SWITCH_INS(INS_JMP_IND, JMPIndirect)	// Indirect
 		//SWITCH_INS(INS_JSR_ABS, JSRAbsolute)	// 6
 		//SWITCH_INS(INS_RTI_IMP, RTIImplied)		// Implied
 		//SWITCH_INS(INS_RTS_IMP, RTSImplied)		// Implied
+#pragma endregion Jump_Instructions
 
+#pragma region Other_Instructions
 		case INS_NOP_IMP:	// 2
 		{
 			m_InstructionQueue.push([&]()
@@ -883,9 +930,9 @@ void CPU::LoadInstruction()
 					AddressBus = PC;
 				});
 		} break;
-
 		//SWITCH_INS(INS_BIT_ZP, BITZeroPage)		// Zero Page
 		//SWITCH_INS(INS_BIT_ABS, BITAbsolute)	// Absolute
+#pragma endregion Other_Instructions
 
 		default:
 			LOG_ERROR("Illegal Opcode ({0}), instruction not handled!", Log::WordToHexString(DataBus));
