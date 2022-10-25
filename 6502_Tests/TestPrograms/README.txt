@@ -1,1 +1,1 @@
-C:\Dev\vasm\vasm6502_oldstyle -Fbin -dotdir program1.s
+C:\Dev\vasm\vasm6502_oldstyle -Fbin -dotdir program.s -o program.out

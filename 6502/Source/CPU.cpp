@@ -1051,8 +1051,51 @@ void CPU::LoadInstruction()
 					PC |= (WORD)DataBus << 8;
 				});
 		} break;
-		//SWITCH_INS(INS_JMP_ABS, JMPAbsolute)	// Absolute
-		//SWITCH_INS(INS_JMP_IND, JMPIndirect)	// Indirect
+		case INS_JMP_ABS:	// 3
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					SetDataBusFromMemory();
+					m_ADL = DataBus;
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC;
+					SetDataBusFromMemory();
+					m_ADH = DataBus;
+					PC = ((WORD)m_ADH << 8) | m_ADL;
+				});
+		} break;
+		case INS_JMP_IND:	// 5
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					SetDataBusFromMemory();
+					m_IAL = DataBus;
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC;
+					SetDataBusFromMemory();
+					m_IAH = DataBus;
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)m_IAH << 8) | m_IAL;
+					SetDataBusFromMemory();
+					m_ADL = DataBus;
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = (((WORD)m_IAH << 8) | m_IAL) + 1;
+					SetDataBusFromMemory();
+					m_ADH = DataBus;
+					PC = ((WORD)m_ADH << 8) | m_ADL;
+				});
+		} break;
+		
 		//SWITCH_INS(INS_JSR_ABS, JSRAbsolute)	// 6
 		//SWITCH_INS(INS_RTS_IMP, RTSImplied)		// Implied
 #pragma endregion Jump_Instructions

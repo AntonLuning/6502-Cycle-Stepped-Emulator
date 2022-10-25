@@ -4,6 +4,7 @@ reset:
   sta $3002
   
   nop
+  nop
 
   .org $fffc
   .word reset

@@ -56,7 +56,9 @@ protected:
 		MCU->clock.Start();
 
 		int32_t cycles = -8;	// -8 for reset cycles
-		while (!(MCU->EEPROM->ReadByte(MCU->CPU.PC) == 0xEA && MCU->CPU.m_InstructionQueue.empty()))
+		while (!(MCU->EEPROM->ReadByte(MCU->CPU.PC) == 0xEA
+			&& MCU->EEPROM->ReadByte(MCU->CPU.PC + 1) == 0xEA
+			&& MCU->CPU.m_InstructionQueue.empty()))
 		{
 			cycles++;
 			MCU->RunCycle();

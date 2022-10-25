@@ -8,6 +8,7 @@ reset:
   stx $1166
   
   nop
+  nop
 
   .org $fffc
   .word reset

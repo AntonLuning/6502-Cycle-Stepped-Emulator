@@ -43,7 +43,7 @@ private:
 
 	BYTE m_BAL, m_BAH;
 	BYTE m_ADL, m_ADH;
-	BYTE m_IAL;
+	BYTE m_IAL, m_IAH;
 	std::queue<std::function<void()>> m_InstructionQueue;
 
 	Memory* m_HandleSRAM = nullptr;
