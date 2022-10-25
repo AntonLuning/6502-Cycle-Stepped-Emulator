@@ -12,8 +12,8 @@ TEST_F(LDYTest, LDYImmediate)
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.Y, 0x42);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 2);
 }
 
@@ -27,8 +27,8 @@ TEST_F(LDYTest, LDYImmediateWithNegativeValue)
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.Y, 0xC2);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 1);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 1);
 	EXPECT_EQ(cycles, 2);
 }
 
@@ -42,8 +42,8 @@ TEST_F(LDYTest, LDYImmediateWithZeroValue)
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.Y, 0x00);
-	EXPECT_EQ(MCU->CPU.PS.Z, 1);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 1);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 2);
 }
 
@@ -58,8 +58,8 @@ TEST_F(LDYTest, LDYZeroPage)
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.Y, 0xF2);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 1);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 1);
 	EXPECT_EQ(cycles, 3);
 }
 
@@ -75,8 +75,8 @@ TEST_F(LDYTest, LDYZeroPageX)
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.Y, 0x42);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 4);
 }
 
@@ -92,8 +92,8 @@ TEST_F(LDYTest, LDYZeroPageXWithZeroPageCrossover)
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.Y, 0x42);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 4);
 }
 
@@ -108,8 +108,8 @@ TEST_F(LDYTest, LDYAbsolute)
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.Y, 0x42);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 4);
 }
 
@@ -125,8 +125,8 @@ TEST_F(LDYTest, LDYAbsoluteX)
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.Y, 0x42);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 4);
 }
 
@@ -142,7 +142,7 @@ TEST_F(LDYTest, LDYAbsoluteXWithPageCrosing)
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.Y, 0x42);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 5);
 }

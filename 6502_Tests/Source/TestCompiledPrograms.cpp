@@ -14,8 +14,8 @@ TEST_F(CompiledProgramTest, Program1)
 
 	EXPECT_EQ(MCU->CPU.A, 0xFF);
 	EXPECT_EQ(MCU->SRAM->ReadByte(0x3002), 0xFF);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 1);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 1);
 	EXPECT_EQ(cycles, 6);
 }
 
@@ -36,8 +36,8 @@ TEST_F(CompiledProgramTest, Program2)
 	EXPECT_EQ(MCU->CPU.Y, 0xFF);
 	EXPECT_EQ(MCU->SRAM->ReadByte(0x25), 0x42);
 	EXPECT_EQ(MCU->SRAM->ReadByte(0x1166), 0x42);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 18);
 }
 
@@ -56,10 +56,10 @@ TEST_F(CompiledProgramTest, Program3)
 	EXPECT_EQ(MCU->CPU.A, 0x75);
 	EXPECT_EQ(MCU->SRAM->ReadByte(0x62), 0x42);
 	EXPECT_EQ(MCU->SRAM->ReadByte(0x3320), 0x75);
-	EXPECT_EQ(MCU->CPU.PS.C, 0);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.V, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.C, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.V, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 16);
 }
 
@@ -75,9 +75,9 @@ TEST_F(CompiledProgramTest, Program4)
 
 	EXPECT_EQ(MCU->CPU.A, 0x30);
 	EXPECT_EQ(MCU->SRAM->ReadByte(0x3320), 0x30);
-	EXPECT_EQ(MCU->CPU.PS.C, 0);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.V, 1);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.C, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.V, 1);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 10);
 }

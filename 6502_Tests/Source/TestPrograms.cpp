@@ -13,8 +13,8 @@ TEST_F(ProgramTest, ProgramMultipleLDA)
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x00);
-	EXPECT_EQ(MCU->CPU.PS.Z, 1);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 1);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 5);
 }
 
@@ -33,8 +33,8 @@ TEST_F(ProgramTest, ProgramLDAAndSTA)
 	EXPECT_EQ(MCU->CPU.A, 0xFA);
 	EXPECT_EQ(MCU->SRAM->ReadByte(0x20), 0x42);
 	EXPECT_EQ(MCU->SRAM->ReadByte(0x66), 0xFA);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 1);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 1);
 	EXPECT_EQ(cycles, 10);
 }
 
@@ -57,7 +57,7 @@ TEST_F(ProgramTest, ProgramLDAndSTWithAXY)
 	EXPECT_EQ(MCU->CPU.Y, 0xFF);
 	EXPECT_EQ(MCU->SRAM->ReadByte(0x25), 0x42);
 	EXPECT_EQ(MCU->SRAM->ReadByte(0x1166), 0x42);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 18);
 }

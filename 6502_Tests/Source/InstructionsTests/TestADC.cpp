@@ -9,15 +9,15 @@ TEST_F(ADCTest, ADCImmediate)
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
 	MCU->CPU.A = 0x22;
-	MCU->CPU.PS.C = 0;
+	MCU->CPU.PS.Bits.C = 0;
 
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x64);
-	EXPECT_EQ(MCU->CPU.PS.C, 0);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.V, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.C, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.V, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 2);
 }
 
@@ -28,15 +28,15 @@ TEST_F(ADCTest, ADCImmediateWithZero)
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
 	MCU->CPU.A = 0x00;
-	MCU->CPU.PS.C = 0;
+	MCU->CPU.PS.Bits.C = 0;
 
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x00);
-	EXPECT_EQ(MCU->CPU.PS.C, 0);
-	EXPECT_EQ(MCU->CPU.PS.Z, 1);
-	EXPECT_EQ(MCU->CPU.PS.V, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.C, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 1);
+	EXPECT_EQ(MCU->CPU.PS.Bits.V, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 2);
 }
 
@@ -47,15 +47,15 @@ TEST_F(ADCTest, ADCImmediateWithCarry)
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
 	MCU->CPU.A = 0xFE;
-	MCU->CPU.PS.C = 0;
+	MCU->CPU.PS.Bits.C = 0;
 
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x40);
-	EXPECT_EQ(MCU->CPU.PS.C, 1);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.V, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.C, 1);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.V, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 2);
 }
 
@@ -66,15 +66,15 @@ TEST_F(ADCTest, ADCImmediateWithOverflow)
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
 	MCU->CPU.A = 0x42;
-	MCU->CPU.PS.C = 0;
+	MCU->CPU.PS.Bits.C = 0;
 
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x84);
-	EXPECT_EQ(MCU->CPU.PS.C, 0);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.V, 1);
-	EXPECT_EQ(MCU->CPU.PS.N, 1);
+	EXPECT_EQ(MCU->CPU.PS.Bits.C, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.V, 1);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 1);
 	EXPECT_EQ(cycles, 2);
 }
 
@@ -85,15 +85,15 @@ TEST_F(ADCTest, ADCImmediateWithCarryAndOverflow)
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
 	MCU->CPU.A = 0x80;
-	MCU->CPU.PS.C = 0;
+	MCU->CPU.PS.Bits.C = 0;
 
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x06);
-	EXPECT_EQ(MCU->CPU.PS.C, 1);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.V, 1);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.C, 1);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.V, 1);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 2);
 }
 
@@ -105,15 +105,15 @@ TEST_F(ADCTest, ADCZeroPage)
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
 	MCU->SRAM->WriteByte(0x35, 0x42);
 	MCU->CPU.A = 0x20;
-	MCU->CPU.PS.C = 0;
+	MCU->CPU.PS.Bits.C = 0;
 
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x62);
-	EXPECT_EQ(MCU->CPU.PS.C, 0);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.V, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.C, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.V, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 3);
 }
 
@@ -126,15 +126,15 @@ TEST_F(ADCTest, ADCZeroPageX)
 	MCU->SRAM->WriteByte(0x38, 0x42);
 	MCU->CPU.A = 0x20;
 	MCU->CPU.X = 0x03;
-	MCU->CPU.PS.C = 0;
+	MCU->CPU.PS.Bits.C = 0;
 
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x62);
-	EXPECT_EQ(MCU->CPU.PS.C, 0);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.V, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.C, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.V, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 4);
 }
 
@@ -147,15 +147,15 @@ TEST_F(ADCTest, ADCZeroPageXWithPageCrossing)
 	MCU->SRAM->WriteByte(0x34, 0x42);
 	MCU->CPU.A = 0x20;
 	MCU->CPU.X = 0xFF;
-	MCU->CPU.PS.C = 0;
+	MCU->CPU.PS.Bits.C = 0;
 
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x62);
-	EXPECT_EQ(MCU->CPU.PS.C, 0);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.V, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.C, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.V, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 4);
 }
 
@@ -167,15 +167,15 @@ TEST_F(ADCTest, ADCAbsolute)
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
 	MCU->SRAM->WriteByte(0x3735, 0x42);
 	MCU->CPU.A = 0x20;
-	MCU->CPU.PS.C = 0;
+	MCU->CPU.PS.Bits.C = 0;
 
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x62);
-	EXPECT_EQ(MCU->CPU.PS.C, 0);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.V, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.C, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.V, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 4);
 }
 
@@ -188,15 +188,15 @@ TEST_F(ADCTest, ADCAbsoluteX)
 	MCU->SRAM->WriteByte(0x3738, 0x42);
 	MCU->CPU.A = 0x20;
 	MCU->CPU.X = 0x03;
-	MCU->CPU.PS.C = 0;
+	MCU->CPU.PS.Bits.C = 0;
 
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x62);
-	EXPECT_EQ(MCU->CPU.PS.C, 0);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.V, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.C, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.V, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 4);
 }
 
@@ -209,15 +209,15 @@ TEST_F(ADCTest, ADCAbsoluteXWithPageCrossing)
 	MCU->SRAM->WriteByte(0x3834, 0x42);
 	MCU->CPU.A = 0x20;
 	MCU->CPU.X = 0xFF;
-	MCU->CPU.PS.C = 0;
+	MCU->CPU.PS.Bits.C = 0;
 
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x62);
-	EXPECT_EQ(MCU->CPU.PS.C, 0);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.V, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.C, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.V, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 5);
 }
 
@@ -230,15 +230,15 @@ TEST_F(ADCTest, ADCAbsoluteY)
 	MCU->SRAM->WriteByte(0x3738, 0x42);
 	MCU->CPU.A = 0x20;
 	MCU->CPU.Y = 0x03;
-	MCU->CPU.PS.C = 0;
+	MCU->CPU.PS.Bits.C = 0;
 
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x62);
-	EXPECT_EQ(MCU->CPU.PS.C, 0);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.V, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.C, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.V, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 4);
 }
 
@@ -251,15 +251,15 @@ TEST_F(ADCTest, ADCAbsoluteYWithPageCrossing)
 	MCU->SRAM->WriteByte(0x3834, 0x42);
 	MCU->CPU.A = 0x20;
 	MCU->CPU.Y = 0xFF;
-	MCU->CPU.PS.C = 0;
+	MCU->CPU.PS.Bits.C = 0;
 
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x62);
-	EXPECT_EQ(MCU->CPU.PS.C, 0);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.V, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.C, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.V, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 5);
 }
 
@@ -274,15 +274,15 @@ TEST_F(ADCTest, ADCIndirectX)
 	MCU->SRAM->WriteByte(0x2056, 0x42);
 	MCU->CPU.A = 0x20;
 	MCU->CPU.X = 0x04;
-	MCU->CPU.PS.C = 0;
+	MCU->CPU.PS.Bits.C = 0;
 
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x62);
-	EXPECT_EQ(MCU->CPU.PS.C, 0);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.V, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.C, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.V, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 6);
 }
 
@@ -297,15 +297,15 @@ TEST_F(ADCTest, ADCIndirectXWithZeroPageCrossover)
 	MCU->SRAM->WriteByte(0x2056, 0x42);
 	MCU->CPU.A = 0x20;
 	MCU->CPU.X = 0xFF;
-	MCU->CPU.PS.C = 0;
+	MCU->CPU.PS.Bits.C = 0;
 
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x62);
-	EXPECT_EQ(MCU->CPU.PS.C, 0);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.V, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.C, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.V, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 6);
 }
 
@@ -320,15 +320,15 @@ TEST_F(ADCTest, ADCIndirectY)
 	MCU->SRAM->WriteByte(0x2059, 0x42);
 	MCU->CPU.A = 0x20;
 	MCU->CPU.Y = 0x03;
-	MCU->CPU.PS.C = 0;
+	MCU->CPU.PS.Bits.C = 0;
 
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x62);
-	EXPECT_EQ(MCU->CPU.PS.C, 0);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.V, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.C, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.V, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 5);
 }
 
@@ -343,14 +343,14 @@ TEST_F(ADCTest, ADCIndirectYWithPageCrossing)
 	MCU->SRAM->WriteByte(0x2155, 0x42);
 	MCU->CPU.A = 0x20;
 	MCU->CPU.Y = 0xFF; 
-	MCU->CPU.PS.C = 0;
+	MCU->CPU.PS.Bits.C = 0;
 
 	int32_t cycles = RunTestProgram();
 
 	EXPECT_EQ(MCU->CPU.A, 0x62);
-	EXPECT_EQ(MCU->CPU.PS.C, 0);
-	EXPECT_EQ(MCU->CPU.PS.Z, 0);
-	EXPECT_EQ(MCU->CPU.PS.V, 0);
-	EXPECT_EQ(MCU->CPU.PS.N, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.C, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.Z, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.V, 0);
+	EXPECT_EQ(MCU->CPU.PS.Bits.N, 0);
 	EXPECT_EQ(cycles, 6);
 }
