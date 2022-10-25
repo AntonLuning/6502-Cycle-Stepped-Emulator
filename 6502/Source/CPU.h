@@ -6,20 +6,20 @@
 #include <functional>
 #include <queue>
 
+struct BitFlags
+{
+	BYTE C : 1;		// Carry (0)
+	BYTE Z : 1;		// Zero (1)
+	BYTE I : 1;		// Interrupt disable (2)
+	BYTE D : 1;		// Decimal (3)
+	BYTE B : 1;		// Break commnd (4)
+	BYTE UB : 1;	// Unused (5)
+	BYTE V : 1;		// Overflow (6)
+	BYTE N : 1;		// Negative (7)
+};
+
 union StatusFlags
 {
-	struct BitFlags
-	{
-		BYTE C : 1;	// Carry (0)
-		BYTE Z : 1;	// Zero (1)
-		BYTE I : 1;	// Interrupt disable (2)
-		BYTE D : 1;	// Decimal (3)
-		BYTE B : 1;	// Break commnd (4)
-		BYTE UB : 1;	// Unused (5)
-		BYTE V : 1;	// Overflow (6)
-		BYTE N : 1;	// Negative (7)
-	};
-
 	BitFlags Bits;
 	BYTE Byte;
 };

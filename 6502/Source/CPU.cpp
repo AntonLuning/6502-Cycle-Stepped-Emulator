@@ -473,8 +473,6 @@ void CPU::LoadInstruction()
 				{
 					AddressBus = PC;
 					SP = X;
-					PS.Bits.Z = SP == 0;
-					PS.Bits.N = (SP & BIT(7)) > 0;
 				});
 		} break;
 		case INS_TYA_IMP:	// 2
@@ -496,7 +494,7 @@ void CPU::LoadInstruction()
 				});
 			m_InstructionQueue.push([&]()
 				{
-					AddressBus = SP++;
+					AddressBus = BIT(8) | SP--;
 					DataBus = A;
 					WriteMemoryFromDataBus();
 				});
@@ -509,15 +507,45 @@ void CPU::LoadInstruction()
 				});
 			m_InstructionQueue.push([&]()
 				{
-					AddressBus = SP++;
+					AddressBus = BIT(8) | SP--;
 					DataBus = PS.Byte;
 					WriteMemoryFromDataBus();
 				});
 		} break;
-
-		//SWITCH_INS(INS_PHP_IMP, PHPImplied)		// Implied
-		//SWITCH_INS(INS_PLA_IMP, PLAImplied)		// Implied
-		//SWITCH_INS(INS_PLP_IMP, PLPImplied)		// Implied
+		case INS_PLA_IMP:	// 4
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC;
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = BIT(8) | SP++;
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = BIT(8) | SP;
+					SetA();
+				});
+		} break;
+		case INS_PLP_IMP:	// 4
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC;
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = BIT(8) | SP++;
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = BIT(8) | SP;
+					SetDataBusFromMemory();
+					PS.Byte = DataBus;
+				});
+		} break;
+	
 		//SWITCH_INS(INS_DEC_ZP, DECZeroPage)		// Zero Page
 		//SWITCH_INS(INS_DEC_ZPX, DECZeroPageX)	// Zero Page X
 		//SWITCH_INS(INS_DEC_ABS, DECAbsolute)	// Absolute
