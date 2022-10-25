@@ -65,6 +65,10 @@ private:
 	void PushAbsoluteXY();
 	void PushIndirectX();
 	void PushIndirectY();
+	void PushZeroPageModified();
+	void PushZeroPageXModified();
+	void PushAbsoluteModified();
+	void PushAbsoluteXModified();
 
 	void SetA();
 	void StoreA();
@@ -74,4 +78,6 @@ private:
 	void StoreY();
 	void AddA();
 	void SubA();
+	void DecDB();
+	void IncDB();
 };

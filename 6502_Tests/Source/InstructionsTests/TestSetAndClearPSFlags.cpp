@@ -9,19 +9,15 @@ TEST_F(PSFlagsTest, CarryFlag)
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
 
-	for (int i = 0; i < 8; i++)
-		MCU->RunCycle();
+	RunCycles(8);
 
-	MCU->RunCycle();
-	MCU->RunCycle();
+	RunCycles(2);
 	EXPECT_EQ(MCU->CPU.PS.Bits.C, 0);
 
-	MCU->RunCycle();
-	MCU->RunCycle();
+	RunCycles(2);
 	EXPECT_EQ(MCU->CPU.PS.Bits.C, 1);
 
-	MCU->RunCycle();
-	MCU->RunCycle();
+	RunCycles(2);
 	EXPECT_EQ(MCU->CPU.PS.Bits.C, 0);
 }
 
@@ -32,19 +28,15 @@ TEST_F(PSFlagsTest, DecimalFlag)
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
 
-	for (int i = 0; i < 8; i++)
-		MCU->RunCycle();
+	RunCycles(8);
 
-	MCU->RunCycle();
-	MCU->RunCycle();
+	RunCycles(2);
 	EXPECT_EQ(MCU->CPU.PS.Bits.D, 0);
 
-	MCU->RunCycle();
-	MCU->RunCycle();
+	RunCycles(2);
 	EXPECT_EQ(MCU->CPU.PS.Bits.D, 1);
 
-	MCU->RunCycle();
-	MCU->RunCycle();
+	RunCycles(2);
 	EXPECT_EQ(MCU->CPU.PS.Bits.D, 0);
 }
 
@@ -55,19 +47,15 @@ TEST_F(PSFlagsTest, InterruptFlag)
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
 
-	for (int i = 0; i < 8; i++)
-		MCU->RunCycle();
+	RunCycles(8);
 
-	MCU->RunCycle();
-	MCU->RunCycle();
+	RunCycles(2);
 	EXPECT_EQ(MCU->CPU.PS.Bits.I, 0);
 
-	MCU->RunCycle();
-	MCU->RunCycle();
+	RunCycles(2);
 	EXPECT_EQ(MCU->CPU.PS.Bits.I, 1);
 
-	MCU->RunCycle();
-	MCU->RunCycle();
+	RunCycles(2);
 	EXPECT_EQ(MCU->CPU.PS.Bits.I, 0);
 }
 
@@ -78,13 +66,11 @@ TEST_F(PSFlagsTest, OverflowFlag)
 	};
 	LoadProgramToEEPROM(program, PROGRAM_LENGTH(program));
 
-	for (int i = 0; i < 8; i++)
-		MCU->RunCycle();
+	RunCycles(8);
 
 	MCU->CPU.PS.Bits.V = 1;
 	EXPECT_EQ(MCU->CPU.PS.Bits.V, 1);
 
-	MCU->RunCycle();
-	MCU->RunCycle();
+	RunCycles(2);
 	EXPECT_EQ(MCU->CPU.PS.Bits.V, 0);
 }

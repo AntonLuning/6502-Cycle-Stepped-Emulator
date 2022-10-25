@@ -65,4 +65,10 @@ protected:
 
 		return cycles;
 	}
+
+	void RunCycles(int32_t quantity)
+	{
+		for (int i = 0; i < quantity; i++)
+			MCU->RunCycle();
+	}
 };
