@@ -10,8 +10,7 @@ CPU::CPU()
 
 void CPU::Reset()
 {
-	std::queue<std::function<void()>> emptyQueue;
-	std::swap(m_InstructionQueue, emptyQueue);
+	ClearInstructionQueue();
 
 	m_InstructionQueue.push([&]()
 		{
@@ -68,6 +67,25 @@ void CPU::RunCycle(Memory* SRAM, Memory* EEPROM)
 	PRINT_CPU("{0} - {1} {2}", Log::WordToHexString(AddressBus), DataRead ? "\"r\"" : "\"W\"", Log::WordToHexString(DataBus));
 }
 
+void CPU::InterruptNMI()
+{
+	NMI = true;
+}
+
+void CPU::InterruptIRQ()
+{
+	if (PS.Bits.I == 1)
+		return;
+
+	IRQ = true;
+}
+
+void CPU::ClearInstructionQueue()
+{
+	std::queue<std::function<void()>> emptyQueue;
+	std::swap(m_InstructionQueue, emptyQueue);
+}
+
 void CPU::SetDataBusFromMemory()
 {
 	Memory* activeMemory = GetMemoryWithAddress(AddressBus);
@@ -122,7 +140,11 @@ Memory* CPU::GetMemoryWithAddress(const WORD& address)
 
 void CPU::LoadInstruction()
 {
-	AddressBus = PC++;
+	if (NMI || IRQ)
+		AddressBus = 0x00;
+	else
+		AddressBus = PC++;
+	
 	SetDataBusFromMemory();
 
 	switch (DataBus)
@@ -421,6 +443,7 @@ void CPU::LoadInstruction()
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = PC;
+					SetDataBusFromMemory();
 					X = A;
 					PS.Bits.Z = X == 0;
 					PS.Bits.N = (X & BIT(7)) > 0;
@@ -431,6 +454,7 @@ void CPU::LoadInstruction()
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = PC;
+					SetDataBusFromMemory();
 					Y = A;
 					PS.Bits.Z = Y == 0;
 					PS.Bits.N = (Y & BIT(7)) > 0;
@@ -441,6 +465,7 @@ void CPU::LoadInstruction()
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = PC;
+					SetDataBusFromMemory();
 					X = SP;
 					PS.Bits.Z = X == 0;
 					PS.Bits.N = (X & BIT(7)) > 0;
@@ -451,6 +476,7 @@ void CPU::LoadInstruction()
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = PC;
+					SetDataBusFromMemory();
 					A = X;
 					PS.Bits.Z = A == 0;
 					PS.Bits.N = (A & BIT(7)) > 0;
@@ -461,6 +487,7 @@ void CPU::LoadInstruction()
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = PC;
+					SetDataBusFromMemory();
 					SP = X;
 				});
 		} break;
@@ -469,6 +496,7 @@ void CPU::LoadInstruction()
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = PC;
+					SetDataBusFromMemory();
 					A = Y;
 					PS.Bits.Z = A == 0;
 					PS.Bits.N = (A & BIT(7)) > 0;
@@ -482,6 +510,7 @@ void CPU::LoadInstruction()
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = PC;
+					SetDataBusFromMemory();
 				});
 			m_InstructionQueue.push([&]()
 				{
@@ -495,6 +524,7 @@ void CPU::LoadInstruction()
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = PC;
+					SetDataBusFromMemory();
 				});
 			m_InstructionQueue.push([&]()
 				{
@@ -508,10 +538,12 @@ void CPU::LoadInstruction()
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = PC;
+					SetDataBusFromMemory();
 				});
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = BIT(8) | SP++;
+					SetDataBusFromMemory();
 				});
 			m_InstructionQueue.push([&]()
 				{
@@ -524,10 +556,12 @@ void CPU::LoadInstruction()
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = PC;
+					SetDataBusFromMemory();
 				});
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = BIT(8) | SP++;
+					SetDataBusFromMemory();
 				});
 			m_InstructionQueue.push([&]()
 				{
@@ -608,6 +642,8 @@ void CPU::LoadInstruction()
 		{
 			m_InstructionQueue.push([&]()
 				{
+					AddressBus = PC;
+					SetDataBusFromMemory();
 					X--;
 					PS.Bits.Z = X == 0;
 					PS.Bits.N = (X & BIT(7)) > 0;
@@ -617,6 +653,8 @@ void CPU::LoadInstruction()
 		{
 			m_InstructionQueue.push([&]()
 				{
+					AddressBus = PC;
+					SetDataBusFromMemory();
 					X++;
 					PS.Bits.Z = X == 0;
 					PS.Bits.N = (X & BIT(7)) > 0;
@@ -626,6 +664,8 @@ void CPU::LoadInstruction()
 		{
 			m_InstructionQueue.push([&]()
 				{
+					AddressBus = PC;
+					SetDataBusFromMemory();
 					Y--;
 					PS.Bits.Z = Y == 0;
 					PS.Bits.N = (Y & BIT(7)) > 0;
@@ -635,6 +675,8 @@ void CPU::LoadInstruction()
 		{
 			m_InstructionQueue.push([&]()
 				{
+					AddressBus = PC;
+					SetDataBusFromMemory();
 					Y++;
 					PS.Bits.Z = Y == 0;
 					PS.Bits.N = (Y & BIT(7)) > 0;
@@ -835,6 +877,7 @@ void CPU::LoadInstruction()
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = PC;
+					SetDataBusFromMemory();
 					PS.Bits.C = 0;
 				});
 		} break;
@@ -843,6 +886,7 @@ void CPU::LoadInstruction()
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = PC;
+					SetDataBusFromMemory();
 					PS.Bits.D = 0;
 				});
 		} break;
@@ -851,6 +895,7 @@ void CPU::LoadInstruction()
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = PC;
+					SetDataBusFromMemory();
 					PS.Bits.I = 0;
 				});
 		} break;
@@ -859,6 +904,7 @@ void CPU::LoadInstruction()
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = PC;
+					SetDataBusFromMemory();
 					PS.Bits.V = 0;
 				});
 		} break;
@@ -867,6 +913,7 @@ void CPU::LoadInstruction()
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = PC;
+					SetDataBusFromMemory();
 					PS.Bits.C = 1;
 				});
 		} break;
@@ -875,6 +922,7 @@ void CPU::LoadInstruction()
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = PC;
+					SetDataBusFromMemory();
 					PS.Bits.D = 1;
 				});
 		} break;
@@ -883,6 +931,7 @@ void CPU::LoadInstruction()
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = PC;
+					SetDataBusFromMemory();
 					PS.Bits.I = 1;
 				});
 		} break;
@@ -914,11 +963,97 @@ void CPU::LoadInstruction()
 #pragma endregion Branch_Instructions
 
 #pragma region Jump_Instructions
-		//SWITCH_INS(INS_BRK_IMP, BRKImplied)		// Implied
+		case INS_BRK_IMP:	// 7
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC;
+					if (!(NMI || IRQ))
+						PC++;
+
+					SetDataBusFromMemory();
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = BIT(8) | SP--;
+					DataBus = PC >> 8;
+					WriteMemoryFromDataBus();
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = BIT(8) | SP--;
+					DataBus = (BYTE)PC;
+					WriteMemoryFromDataBus();
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = BIT(8) | SP--;
+					DataBus = PS.Byte;
+					WriteMemoryFromDataBus();
+				});
+			m_InstructionQueue.push([&]()
+				{
+					PS.Bits.I = 1;
+					if (NMI || IRQ)
+						PS.Bits.B = 0;
+					else
+						PS.Bits.B = 1;
+					
+					if (NMI)
+						PC = 0xFFFA;
+					else
+						PC = 0xFFFE;
+
+					IRQ = false;
+					NMI = false;
+
+					AddressBus = PC++;
+					SetDataBusFromMemory();
+					m_ADL = DataBus;
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC;
+					SetDataBusFromMemory();
+					m_ADH = DataBus;
+					PC = ((WORD)m_ADH << 8) | m_ADL;
+				});
+		} break;
+		case INS_RTI_IMP:	// 6
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC;
+					SetDataBusFromMemory();
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = BIT(8) | SP++;
+					SetDataBusFromMemory();
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = BIT(8) | SP++;
+					SetDataBusFromMemory();
+					PS.Byte = DataBus;
+					PS.Bits.B = 0;
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = BIT(8) | SP++;
+					SetDataBusFromMemory();
+					PC = DataBus;
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = BIT(8) | SP;
+					SetDataBusFromMemory();
+					PC |= (WORD)DataBus << 8;
+				});
+		} break;
 		//SWITCH_INS(INS_JMP_ABS, JMPAbsolute)	// Absolute
 		//SWITCH_INS(INS_JMP_IND, JMPIndirect)	// Indirect
 		//SWITCH_INS(INS_JSR_ABS, JSRAbsolute)	// 6
-		//SWITCH_INS(INS_RTI_IMP, RTIImplied)		// Implied
 		//SWITCH_INS(INS_RTS_IMP, RTSImplied)		// Implied
 #pragma endregion Jump_Instructions
 
@@ -928,6 +1063,7 @@ void CPU::LoadInstruction()
 			m_InstructionQueue.push([&]()
 				{
 					AddressBus = PC;
+					SetDataBusFromMemory();
 				});
 		} break;
 		//SWITCH_INS(INS_BIT_ZP, BITZeroPage)		// Zero Page

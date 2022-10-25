@@ -35,8 +35,12 @@ public:
 	WORD AddressBus;
 	BYTE DataBus;
 	bool DataRead;		// Read/Write bit (RWB)
+	bool NMI = false;
+	bool IRQ = false;
 
 private:
+	friend class ComputerTest;
+
 	BYTE m_BAL, m_BAH;
 	BYTE m_ADL, m_ADH;
 	BYTE m_IAL;
@@ -52,7 +56,12 @@ public:
 	void Reset();
 	void RunCycle(Memory* SRAM, Memory* EEPROM);
 
+	void InterruptNMI();
+	void InterruptIRQ();
+
 private:
+	void ClearInstructionQueue();
+
 	void SetDataBusFromMemory();
 	void WriteMemoryFromDataBus();
 	Memory* GetMemoryWithAddress(const WORD& address);
