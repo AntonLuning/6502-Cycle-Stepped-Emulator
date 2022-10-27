@@ -87,6 +87,9 @@ private:
 	void StoreY();
 	void AddA();
 	void SubA();
+	void AndA();
+	void OrA();
+	void ExclusiveOrA();
 	void CompareA();
 	void CompareX();
 	void CompareY();

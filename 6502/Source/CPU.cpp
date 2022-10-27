@@ -847,40 +847,224 @@ void CPU::LoadInstruction()
 #pragma endregion
 
 #pragma region Logical_Instructions
-		//SWITCH_INS(INS_AND_IM, ANDImmediate)  	// Immediate
-		//SWITCH_INS(INS_AND_ZP, ANDZeroPage)		// Zero Page
-		//SWITCH_INS(INS_AND_ZPX, ANDZeroPageX)	// Zero Page X
-		//SWITCH_INS(INS_AND_ABS, ANDAbsolute)	// Absolute
-		//SWITCH_INS(INS_AND_ABSX, ANDAbsoluteX)	// Absolute X
-		//SWITCH_INS(INS_AND_ABSY, ANDAbsoluteY)	// Absolute Y
-		//SWITCH_INS(INS_AND_INDX, ANDIndirectX)	// Indirect X
-		//SWITCH_INS(INS_AND_INDY, ANDIndirectY)	// Indirect Y
+		case INS_AND_IM:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					AndA();
+				});
+		} break;
+		case INS_AND_ZP:	// 3
+		{
+			PushZeroPage();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = m_ADL;
+					AndA();
+				});
+		} break;
+		case INS_AND_ZPX:	// 4
+		{
+			PushZeroPageXY();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = (BYTE)(m_BAL + X);
+					AndA();
+				});
+		} break;
+		case INS_AND_ABS:	// 4
+		{
+			PushAbsolute();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
+					AndA();
+				});
+		} break;
+		case INS_AND_ABSX:	// 4(5)
+		{
+			PushAbsoluteXY();
+			m_InstructionQueue.push([&]()
+				{
+					EXTRA_CYCLE_CHECK(X, AndA)
+				});
+		} break;
+		case INS_AND_ABSY:	// 4(5)
+		{
+			PushAbsoluteXY();
+			m_InstructionQueue.push([&]()
+				{
+					EXTRA_CYCLE_CHECK(Y, AndA)
+				});
+		} break;
+		case INS_AND_INDX:	// 6
+		{
+			PushIndirectX();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
+					AndA();
+				});
+		} break;
+		case INS_AND_INDY:	// 5(6)
+		{
+			PushIndirectY();
+			m_InstructionQueue.push([&]()
+				{
+					EXTRA_CYCLE_CHECK(Y, AndA)
+				});
+		} break;
+
+		case INS_ORA_IM:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					OrA();
+				});
+		} break;
+		case INS_ORA_ZP:	// 3
+		{
+			PushZeroPage();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = m_ADL;
+					OrA();
+				});
+		} break;
+		case INS_ORA_ZPX:	// 4
+		{
+			PushZeroPageXY();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = (BYTE)(m_BAL + X);
+					OrA();
+				});
+		} break;
+		case INS_ORA_ABS:	// 4
+		{
+			PushAbsolute();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
+					OrA();
+				});
+		} break;
+		case INS_ORA_ABSX:	// 4(5)
+		{
+			PushAbsoluteXY();
+			m_InstructionQueue.push([&]()
+				{
+					EXTRA_CYCLE_CHECK(X, OrA)
+				});
+		} break;
+		case INS_ORA_ABSY:	// 4(5)
+		{
+			PushAbsoluteXY();
+			m_InstructionQueue.push([&]()
+				{
+					EXTRA_CYCLE_CHECK(Y, OrA)
+				});
+		} break;
+		case INS_ORA_INDX:	// 6
+		{
+			PushIndirectX();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
+					OrA();
+				});
+		} break;
+		case INS_ORA_INDY:	// 5(6)
+		{
+			PushIndirectY();
+			m_InstructionQueue.push([&]()
+				{
+					EXTRA_CYCLE_CHECK(Y, OrA)
+				});
+		} break;
+
+		case INS_EOR_IM:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					ExclusiveOrA();
+				});
+		} break;
+		case INS_EOR_ZP:	// 3
+		{
+			PushZeroPage();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = m_ADL;
+					ExclusiveOrA();
+				});
+		} break;
+		case INS_EOR_ZPX:	// 4
+		{
+			PushZeroPageXY();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = (BYTE)(m_BAL + X);
+					ExclusiveOrA();
+				});
+		} break;
+		case INS_EOR_ABS:	// 4
+		{
+			PushAbsolute();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
+					ExclusiveOrA();
+				});
+		} break;
+		case INS_EOR_ABSX:	// 4(5)
+		{
+			PushAbsoluteXY();
+			m_InstructionQueue.push([&]()
+				{
+					EXTRA_CYCLE_CHECK(X, ExclusiveOrA)
+				});
+		} break;
+		case INS_EOR_ABSY:	// 4(5)
+		{
+			PushAbsoluteXY();
+			m_InstructionQueue.push([&]()
+				{
+					EXTRA_CYCLE_CHECK(Y, ExclusiveOrA)
+				});
+		} break;
+		case INS_EOR_INDX:	// 6
+		{
+			PushIndirectX();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
+					ExclusiveOrA();
+				});
+		} break;
+		case INS_EOR_INDY:	// 5(6)
+		{
+			PushIndirectY();
+			m_InstructionQueue.push([&]()
+				{
+					EXTRA_CYCLE_CHECK(Y, ExclusiveOrA)
+				});
+		} break;
+	
 		//SWITCH_INS(INS_ASL_ACC, ASLAccumulator)	// Accumulator
 		//SWITCH_INS(INS_ASL_ZP, ASLZeroPage)		// Zero Page
 		//SWITCH_INS(INS_ASL_ZPX, ASLZeroPageX) 	// Zero Page X
 		//SWITCH_INS(INS_ASL_ABS, ASLAbsolute)  	// Absolute
 		//SWITCH_INS(INS_ASL_ABSX, ASLAbsoluteX)	// Absolute X
-		//SWITCH_INS(INS_EOR_IM, EORImmediate)  	// Immediate
-		//SWITCH_INS(INS_EOR_ZP, EORZeroPage)		// Zero Page
-		//SWITCH_INS(INS_EOR_ZPX, EORZeroPageX)	// Zero Page X
-		//SWITCH_INS(INS_EOR_ABS, EORAbsolute)	// Absolute
-		//SWITCH_INS(INS_EOR_ABSX, EORAbsoluteX)	// Absolute X
-		//SWITCH_INS(INS_EOR_ABSY, EORAbsoluteY)	// Absolute Y
-		//SWITCH_INS(INS_EOR_INDX, EORIndirectX)	// Indirect X
-		//SWITCH_INS(INS_EOR_INDY, EORIndirectY)	// Indirect Y
 		//SWITCH_INS(INS_LSR_ACC, LSRAccumulator)	// Accumulator
 		//SWITCH_INS(INS_LSR_ZP, LSRZeroPage)		// Zero Page
 		//SWITCH_INS(INS_LSR_ZPX, LSRZeroPageX)	// Zero Page X
 		//SWITCH_INS(INS_LSR_ABS, LSRAbsolute)	// Absolute
 		//SWITCH_INS(INS_LSR_ABSX, LSRAbsoluteX)	// Absolute X
-		//SWITCH_INS(INS_ORA_IM, ORAImmediate)	// Immediate
-		//SWITCH_INS(INS_ORA_ZP, ORAZeroPage)		// Zero Page
-		//SWITCH_INS(INS_ORA_ZPX, ORAZeroPageX)  	// Zero Page X
-		//SWITCH_INS(INS_ORA_ABS, ORAAbsolute)   	// Absolute
-		//SWITCH_INS(INS_ORA_ABSX, ORAAbsoluteX) 	// Absolute X
-		//SWITCH_INS(INS_ORA_ABSY, ORAAbsoluteY) 	// Absolute Y
-		//SWITCH_INS(INS_ORA_INDX, ORAIndirectX) 	// Indirect X
-		//SWITCH_INS(INS_ORA_INDY, ORAIndirectY) 	// Indirect Y
+	
 		//SWITCH_INS(INS_ROL_ACC, ROLAccumulator)	// Accumulator
 		//SWITCH_INS(INS_ROL_ZP, ROLZeroPage)		// Zero Page
 		//SWITCH_INS(INS_ROL_ZPX, ROLZeroPageX)  	// Zero Page X
@@ -1654,6 +1838,30 @@ void CPU::SubA()
 	PS.Bits.V = ((A ^ result) & ((0xFF - DataBus) ^ result) & BIT(7)) > 0;
 	A = (result & 0xFF);
 	PS.Bits.C = (result & BIT(8)) > 0;
+	PS.Bits.Z = A == 0;
+	PS.Bits.N = (A & BIT(7)) > 0;
+}
+
+void CPU::AndA()
+{
+	SetDataBusFromMemory();
+	A &= DataBus;
+	PS.Bits.Z = A == 0;
+	PS.Bits.N = (A & BIT(7)) > 0;
+}
+
+void CPU::OrA()
+{
+	SetDataBusFromMemory();
+	A |= DataBus;
+	PS.Bits.Z = A == 0;
+	PS.Bits.N = (A & BIT(7)) > 0;
+}
+
+void CPU::ExclusiveOrA()
+{
+	SetDataBusFromMemory();
+	A ^= DataBus;
 	PS.Bits.Z = A == 0;
 	PS.Bits.N = (A & BIT(7)) > 0;
 }

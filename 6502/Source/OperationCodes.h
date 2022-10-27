@@ -166,12 +166,15 @@
 #define INS_AND_INDX	((BYTE)0x21)	// Indirect X
 #define INS_AND_INDY	((BYTE)0x31)	// Indirect Y
 
-// ASL - Arithmetic shift left
-#define INS_ASL_ACC		((BYTE)0x0A)	// Accumulator
-#define INS_ASL_ZP		((BYTE)0x06)	// Zero Page
-#define INS_ASL_ZPX		((BYTE)0x16)	// Zero Page X
-#define INS_ASL_ABS		((BYTE)0x0E)	// Absolute
-#define INS_ASL_ABSX	((BYTE)0x1E)	// Absolute X
+// ORA - Or (with accumulator)
+#define INS_ORA_IM		((BYTE)0x09)	// Immediate
+#define INS_ORA_ZP		((BYTE)0x05)	// Zero Page
+#define INS_ORA_ZPX		((BYTE)0x15)	// Zero Page X
+#define INS_ORA_ABS		((BYTE)0x0D)	// Absolute
+#define INS_ORA_ABSX	((BYTE)0x1D)	// Absolute X
+#define INS_ORA_ABSY	((BYTE)0x19)	// Absolute Y
+#define INS_ORA_INDX	((BYTE)0x01)	// Indirect X
+#define INS_ORA_INDY	((BYTE)0x11)	// Indirect Y
 
 // EOR - Exclusive or (with accumulator)
 #define INS_EOR_IM		((BYTE)0x49)	// Immediate
@@ -183,22 +186,19 @@
 #define INS_EOR_INDX	((BYTE)0x41)	// Indirect X
 #define INS_EOR_INDY	((BYTE)0x51)	// Indirect Y
 
+// ASL - Arithmetic shift left
+#define INS_ASL_ACC		((BYTE)0x0A)	// Accumulator
+#define INS_ASL_ZP		((BYTE)0x06)	// Zero Page
+#define INS_ASL_ZPX		((BYTE)0x16)	// Zero Page X
+#define INS_ASL_ABS		((BYTE)0x0E)	// Absolute
+#define INS_ASL_ABSX	((BYTE)0x1E)	// Absolute X
+
 // LSR - Logical shift right
 #define INS_LSR_ACC		((BYTE)0x4A)	// Accumulator
 #define INS_LSR_ZP		((BYTE)0x46)	// Zero Page
 #define INS_LSR_ZPX		((BYTE)0x56)	// Zero Page X
 #define INS_LSR_ABS		((BYTE)0x4E)	// Absolute
 #define INS_LSR_ABSX	((BYTE)0x5E)	// Absolute X
-
-// ORA - Or (with accumulator)
-#define INS_ORA_IM		((BYTE)0x09)	// Immediate
-#define INS_ORA_ZP		((BYTE)0x05)	// Zero Page
-#define INS_ORA_ZPX		((BYTE)0x15)	// Zero Page X
-#define INS_ORA_ABS		((BYTE)0x0D)	// Absolute
-#define INS_ORA_ABSX	((BYTE)0x1D)	// Absolute X
-#define INS_ORA_ABSY	((BYTE)0x19)	// Absolute Y
-#define INS_ORA_INDX	((BYTE)0x01)	// Indirect X
-#define INS_ORA_INDY	((BYTE)0x11)	// Indirect Y
 
 // ROL - Rotate left
 #define INS_ROL_ACC		((BYTE)0x2A)	// Accumulator
