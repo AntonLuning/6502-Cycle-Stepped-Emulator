@@ -1033,20 +1033,127 @@ void CPU::LoadInstruction()
 				});
 		} break;
 
-		//SWITCH_INS(INS_CMP_IM, CMPImmediate)	// Immediate
-		//SWITCH_INS(INS_CMP_ZP, CMPZeroPage)		// Zero Page
-		//SWITCH_INS(INS_CMP_ZPX, CMPZeroPageX) 	// Zero Page X
-		//SWITCH_INS(INS_CMP_ABS, CMPAbsolute)  	// Absolute
-		//SWITCH_INS(INS_CMP_ABSX, CMPAbsoluteX)	// Absolute X
-		//SWITCH_INS(INS_CMP_ABSY, CMPAbsoluteY)	// Absolute Y
-		//SWITCH_INS(INS_CMP_INDX, CMPIndirectX)	// Indirect X
-		//SWITCH_INS(INS_CMP_INDY, CMPIndirectY)	// Indirect Y
-		//SWITCH_INS(INS_CPX_IM, CPXImmediate)  	// Immediate
-		//SWITCH_INS(INS_CPX_ZP, CPXZeroPage)		// Zero Page
-		//SWITCH_INS(INS_CPX_ABS, CPXAbsolute)	// Absolute
-		//SWITCH_INS(INS_CPY_IM, CPYImmediate)	// Immediate
-		//SWITCH_INS(INS_CPY_ZP, CPYZeroPage)		// Zero Page
-		//SWITCH_INS(INS_CPY_ABS, CPYAbsolute)	// Absolute
+		case INS_CMP_IM:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					CompareA();
+				});
+		} break;
+		case INS_CMP_ZP:	// 3
+		{
+			PushZeroPage();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = m_ADL;
+					CompareA();
+				});
+		} break;
+		case INS_CMP_ZPX:	// 4
+		{
+			PushZeroPageXY();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = (BYTE)(m_BAL + X);
+					CompareA();
+				});
+		} break;
+		case INS_CMP_ABS:	// 4
+		{
+			PushAbsolute();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
+					CompareA();
+				});
+		} break;
+		case INS_CMP_ABSX:	// 4(5)
+		{
+			PushAbsoluteXY();
+			m_InstructionQueue.push([&]()
+				{
+					EXTRA_CYCLE_CHECK(X, CompareA)
+				});
+		} break;
+		case INS_CMP_ABSY:	// 4(5)
+		{
+			PushAbsoluteXY();
+			m_InstructionQueue.push([&]()
+				{
+					EXTRA_CYCLE_CHECK(Y, CompareA)
+				});
+		} break;
+		case INS_CMP_INDX:	// 6
+		{
+			PushIndirectX();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
+					CompareA();
+				});
+		} break;
+		case INS_CMP_INDY:	// 5(6)
+		{
+			PushIndirectY();
+			m_InstructionQueue.push([&]()
+				{
+					EXTRA_CYCLE_CHECK(Y, CompareA)
+				});
+		} break;
+
+		case INS_CPX_IM:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					CompareX();
+				});
+		} break;
+		case INS_CPX_ZP:	// 3
+		{
+			PushZeroPage();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = m_ADL;
+					CompareX();
+				});
+		} break;
+		case INS_CPX_ABS:	// 4
+		{
+			PushAbsolute();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
+					CompareX();
+				});
+		} break;
+		case INS_CPY_IM:	// 2
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					CompareY();
+				});
+		} break;
+		case INS_CPY_ZP:	// 3
+		{
+			PushZeroPage();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = m_ADL;
+					CompareY();
+				});
+		} break;
+		case INS_CPY_ABS:	// 4
+		{
+			PushAbsolute();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;
+					CompareY();
+				});
+		} break;
 #pragma endregion
 
 #pragma region Jump_Instructions
@@ -1549,6 +1656,36 @@ void CPU::SubA()
 	PS.Bits.C = (result & BIT(8)) > 0;
 	PS.Bits.Z = A == 0;
 	PS.Bits.N = (A & BIT(7)) > 0;
+}
+
+void CPU::CompareA()
+{
+	SetDataBusFromMemory();
+	int16_t result = A - DataBus;
+
+	PS.Bits.C = (result & BIT(8)) > 0;
+	PS.Bits.Z = BYTE(result) == 0;
+	PS.Bits.N = (result & BIT(7)) > 0;
+}
+
+void CPU::CompareX()
+{
+	SetDataBusFromMemory();
+	int16_t result = X - DataBus;
+
+	PS.Bits.C = (result & BIT(8)) > 0;
+	PS.Bits.Z = BYTE(result) == 0;
+	PS.Bits.N = (result & BIT(7)) > 0;
+}
+
+void CPU::CompareY()
+{
+	SetDataBusFromMemory();
+	int16_t result = Y - DataBus;
+
+	PS.Bits.C = (result & BIT(8)) > 0;
+	PS.Bits.Z = BYTE(result) == 0;
+	PS.Bits.N = (result & BIT(7)) > 0;
 }
 
 void CPU::DecDB()

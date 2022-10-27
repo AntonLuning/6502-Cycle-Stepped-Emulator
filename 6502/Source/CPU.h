@@ -87,6 +87,9 @@ private:
 	void StoreY();
 	void AddA();
 	void SubA();
+	void CompareA();
+	void CompareX();
+	void CompareY();
 	void DecDB();
 	void IncDB();
 	void TestBit();
