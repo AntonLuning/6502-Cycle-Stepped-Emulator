@@ -11,7 +11,7 @@ class Clock
 private:
 	bool m_Running = false;
 	bool m_Step = false;
-	uint32_t m_Speed = 0;	// In ms
+	float m_Speed = 0;	// In ms
 	std::chrono::steady_clock::time_point m_NextCycleTime;
 
 public:
@@ -27,7 +27,7 @@ public:
 	void WaitForNextCycle();
 
 	void SetSpeedHZ(uint32_t speed);
-	void SetSpeedMS(uint32_t speed);
+	void SetSpeedMS(float speed);
 
 private:
 	void UpdateClock();

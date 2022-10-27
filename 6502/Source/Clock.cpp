@@ -30,7 +30,7 @@ void Clock::WaitForNextCycle()
 	else if (m_Speed != 0)
 	{
 		std::this_thread::sleep_until(m_NextCycleTime);
-		m_NextCycleTime += std::chrono::milliseconds(m_Speed);
+		m_NextCycleTime += std::chrono::microseconds((uint32_t)(m_Speed * 1000));
 	}
 }
 
@@ -41,16 +41,22 @@ void Clock::SetSpeedHZ(uint32_t speed)
 		LOG_ERROR("Can't set clock speed to 0 Hz. Use the \"Stop\" function if you desire to stop the clock.");
 		return;
 	}
-	SetSpeedMS(1000 / speed);
+	SetSpeedMS((float)1000 / speed);
 }
 
-void Clock::SetSpeedMS(uint32_t speed)
+void Clock::SetSpeedMS(float speed)
 {
+	if (speed < 0)
+	{
+		LOG_ERROR("The clock speed in MS must be a positive number.");
+		return;
+	}
+
 	m_Speed = speed;
 	if (m_Speed != 0)
 	{
 		UpdateClock();
-		LOG_INFO("Clock speed set to {0} Hz ({1} ms per cycle)", 1000 / m_Speed, m_Speed);
+		LOG_INFO("Clock speed set to {0} Hz ({1} ms per cycle)", (uint32_t)(1000 / m_Speed), m_Speed);
 	}
 	else
 		LOG_INFO("Clock speed set to max speed)");
@@ -58,5 +64,5 @@ void Clock::SetSpeedMS(uint32_t speed)
 
 void Clock::UpdateClock()
 {
-	m_NextCycleTime = std::chrono::high_resolution_clock::now() + std::chrono::milliseconds(m_Speed);
+	m_NextCycleTime = std::chrono::high_resolution_clock::now() + std::chrono::microseconds((uint32_t)(m_Speed * 1000));
 }

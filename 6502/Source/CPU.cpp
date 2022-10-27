@@ -21,17 +21,17 @@ void CPU::Reset()
 	m_InstructionQueue.push([&]() {});
 	m_InstructionQueue.push([&]()
 		{
-			AddressBus = 0x0100;
+			AddressBus = BIT(8) | SP;
 			SetDataBusFromMemory();
 		});
 	m_InstructionQueue.push([&]()
 		{
-			AddressBus = 0x01FF;
+			AddressBus = BIT(8) | (SP - 1);
 			SetDataBusFromMemory();
 		});
 	m_InstructionQueue.push([&]()
 		{
-			AddressBus = 0x01FE;
+			AddressBus = BIT(8) | (SP - 2);
 			SetDataBusFromMemory();
 		});
 	m_InstructionQueue.push([&]()
@@ -120,23 +120,24 @@ Memory* CPU::GetMemoryWithAddress(const WORD& address)
 	return nullptr;
 }
 
-#define EXTRA_CYCLE_CHECK(index, func)	if (WORD(m_BAL) + index > 0xFF) \
-										{ \
-											m_InstructionQueue.push([&]() \
-												{ \
-													m_ADL = m_BAL + index; \
-													m_ADH = m_BAH + 1; \
-													AddressBus = ((WORD)m_ADH << 8) | m_ADL; \
-													##func(); \
-												}); \
-										} \
-										else \
-										{ \
-											m_ADL = m_BAL + index; \
-											m_ADH = m_BAH; \
-											AddressBus = ((WORD)m_ADH << 8) | m_ADL; \
-											##func(); \
-										} \
+#define EXTRA_CYCLE_CHECK(index, func)						\
+	if (WORD(m_BAL) + index > 0xFF)							\
+	{														\
+		m_InstructionQueue.push([&]()						\
+			{												\
+				m_ADL = m_BAL + index;						\
+				m_ADH = m_BAH + 1;							\
+				AddressBus = ((WORD)m_ADH << 8) | m_ADL;	\
+				##func();									\
+			});												\
+	}														\
+	else													\
+	{														\
+		m_ADL = m_BAL + index;								\
+		m_ADH = m_BAH;										\
+		AddressBus = ((WORD)m_ADH << 8) | m_ADL;			\
+		##func();											\
+	}														\
 
 void CPU::LoadInstruction()
 {
@@ -502,7 +503,7 @@ void CPU::LoadInstruction()
 					PS.Bits.N = (A & BIT(7)) > 0;
 				});
 		} break;
-#pragma endregion Transfer_Instructions
+#pragma endregion
 
 #pragma region PushPull_Instructions
 		case INS_PHA_IMP:	// 3
@@ -570,7 +571,7 @@ void CPU::LoadInstruction()
 					PS.Byte = DataBus;
 				});
 		} break;
-#pragma endregion PushPull_Instructions
+#pragma endregion
 
 #pragma region DecInc_Instructions
 		case INS_DEC_ZP:	// 5
@@ -682,7 +683,7 @@ void CPU::LoadInstruction()
 					PS.Bits.N = (Y & BIT(7)) > 0;
 				});
 		} break;
-#pragma endregion DecInc_Instructions
+#pragma endregion
 
 #pragma region Arithmetic_Instructions
 		case INS_ADC_IM:	// 2
@@ -822,7 +823,7 @@ void CPU::LoadInstruction()
 					EXTRA_CYCLE_CHECK(Y, SubA)
 				});
 		} break;
-#pragma endregion Arithmetic_Instructions
+#pragma endregion
 
 #pragma region Logical_Instructions
 		//SWITCH_INS(INS_AND_IM, ANDImmediate)  	// Immediate
@@ -869,7 +870,7 @@ void CPU::LoadInstruction()
 		//SWITCH_INS(INS_ROR_ZPX, RORZeroPageX) 	// Zero Page X
 		//SWITCH_INS(INS_ROR_ABS, RORAbsolute)  	// Absolute
 		//SWITCH_INS(INS_ROR_ABSX, RORAbsoluteX)	// Absolute X
-#pragma endregion Logical_Instructions
+#pragma endregion
 
 #pragma region Flag_Instructions
 		case INS_CLC_IMP:	// 2
@@ -935,7 +936,7 @@ void CPU::LoadInstruction()
 					PS.Bits.I = 1;
 				});
 		} break;
-#pragma endregion Flag_Instructions
+#pragma endregion
 
 #pragma region Branch_Instructions
 		//SWITCH_INS(INS_BCC_REL, BCCImplied)		// Relative
@@ -960,7 +961,7 @@ void CPU::LoadInstruction()
 		//SWITCH_INS(INS_CPY_IM, CPYImmediate)	// Immediate
 		//SWITCH_INS(INS_CPY_ZP, CPYZeroPage)		// Zero Page
 		//SWITCH_INS(INS_CPY_ABS, CPYAbsolute)	// Absolute
-#pragma endregion Branch_Instructions
+#pragma endregion
 
 #pragma region Jump_Instructions
 		case INS_BRK_IMP:	// 7
@@ -1095,10 +1096,70 @@ void CPU::LoadInstruction()
 					PC = ((WORD)m_ADH << 8) | m_ADL;
 				});
 		} break;
-		
-		//SWITCH_INS(INS_JSR_ABS, JSRAbsolute)	// 6
-		//SWITCH_INS(INS_RTS_IMP, RTSImplied)		// Implied
-#pragma endregion Jump_Instructions
+		case INS_JSR_ABS:	// 6
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					SetDataBusFromMemory();
+					m_ADL = DataBus;
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = BIT(8) | SP;
+					SetDataBusFromMemory();
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = BIT(8) | SP--;
+					DataBus = PC >> 8;
+					WriteMemoryFromDataBus();
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = BIT(8) | SP--;
+					DataBus = PC;
+					WriteMemoryFromDataBus();
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC;
+					SetDataBusFromMemory();
+					m_ADH = DataBus;
+					PC = ((WORD)m_ADH << 8) | m_ADL;
+				});
+		} break;
+		case INS_RTS_IMP:	// 6
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC;
+					SetDataBusFromMemory();
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = BIT(8) | SP++;
+					SetDataBusFromMemory();
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = BIT(8) | SP++;
+					SetDataBusFromMemory();
+					PC = DataBus;
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = BIT(8) | SP;
+					SetDataBusFromMemory();
+					PC |= (WORD)DataBus << 8;
+				});
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					SetDataBusFromMemory();
+				});
+		} break;
+#pragma endregion
 
 #pragma region Other_Instructions
 		case INS_NOP_IMP:	// 2
@@ -1111,7 +1172,7 @@ void CPU::LoadInstruction()
 		} break;
 		//SWITCH_INS(INS_BIT_ZP, BITZeroPage)		// Zero Page
 		//SWITCH_INS(INS_BIT_ABS, BITAbsolute)	// Absolute
-#pragma endregion Other_Instructions
+#pragma endregion
 
 		default:
 			LOG_ERROR("Illegal Opcode ({0}), instruction not handled!", Log::WordToHexString(DataBus));
