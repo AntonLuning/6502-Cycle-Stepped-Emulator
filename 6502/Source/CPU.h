@@ -89,4 +89,5 @@ private:
 	void SubA();
 	void DecDB();
 	void IncDB();
+	void TestBit();
 };

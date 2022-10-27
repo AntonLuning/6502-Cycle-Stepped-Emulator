@@ -1170,8 +1170,24 @@ void CPU::LoadInstruction()
 					SetDataBusFromMemory();
 				});
 		} break;
-		//SWITCH_INS(INS_BIT_ZP, BITZeroPage)		// Zero Page
-		//SWITCH_INS(INS_BIT_ABS, BITAbsolute)	// Absolute
+		case INS_BIT_ZP:	// 3
+		{
+			PushZeroPage();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = m_ADL;
+					TestBit();	
+				});
+		} break;
+		case INS_BIT_ABS:	// 4
+		{
+			PushAbsolute();
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = ((WORD)m_ADH << 8) | m_ADL;				
+					TestBit();
+				});
+		} break;
 #pragma endregion
 
 		default:
@@ -1462,5 +1478,13 @@ void CPU::IncDB()
 	DataBus++;
 	WriteMemoryFromDataBus();
 	PS.Bits.Z = DataBus == 0;
+	PS.Bits.N = (DataBus & BIT(7)) > 0;
+}
+
+void CPU::TestBit()
+{
+	SetDataBusFromMemory();
+	PS.Bits.Z = (A & DataBus) == 0;
+	PS.Bits.V = (DataBus & BIT(6)) > 0;
 	PS.Bits.N = (DataBus & BIT(7)) > 0;
 }

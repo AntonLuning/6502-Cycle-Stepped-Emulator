@@ -25,7 +25,7 @@ protected:
 		Log::Init();
 
 		MCU = new Computer(SRAM_MEMORY, EEPROM_MEMORY);
-		MCU->clock.SetSpeedMS(1);
+		MCU->clock.SetSpeedMS(0);
 		MCU->clock.Start();
 	}
 
