@@ -137,7 +137,28 @@ Memory* CPU::GetMemoryWithAddress(const WORD& address)
 		m_ADH = m_BAH;										\
 		AddressBus = ((WORD)m_ADH << 8) | m_ADL;			\
 		##func();											\
-	}														\
+	}
+
+#define BRANCH_CHECK(condition)										\
+	if (condition)													\
+	{																\
+		m_InstructionQueue.push([&]()								\
+			{														\
+				if ((PC >> 8) != ((PC + (int8_t)DataBus) >> 8))		\
+				{													\
+					m_InstructionQueue.push([&]()					\
+						{											\
+							PC += (int8_t)DataBus;					\
+							AddressBus = PC;						\
+						});											\
+				}													\
+				else												\
+				{													\
+					PC += (int8_t)DataBus;							\
+					AddressBus = PC;								\
+				}													\
+			});														\
+	}
 
 void CPU::LoadInstruction()
 {
@@ -939,14 +960,79 @@ void CPU::LoadInstruction()
 #pragma endregion
 
 #pragma region Branch_Instructions
-		//SWITCH_INS(INS_BCC_REL, BCCImplied)		// Relative
-		//SWITCH_INS(INS_BCS_REL, BCSImplied)		// Relative
-		//SWITCH_INS(INS_BEQ_REL, BEQImplied)		// Relative
-		//SWITCH_INS(INS_BMI_REL, BMIImplied)		// Relative
-		//SWITCH_INS(INS_BNE_REL, BNEImplied)		// Relative
-		//SWITCH_INS(INS_BPL_REL, BPLImplied)		// Relative
-		//SWITCH_INS(INS_BVC_REL, BVCImplied)		// Relative
-		//SWITCH_INS(INS_BVS_REL, BVSImplied)		// Relative
+		case INS_BCC_REL:	// 2/3(4)
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					SetDataBusFromMemory();
+					BRANCH_CHECK(PS.Bits.C == 0);
+				});
+		} break;
+		case INS_BCS_REL:	// 2/3(4)
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					SetDataBusFromMemory();
+					BRANCH_CHECK(PS.Bits.C == 1);
+				});
+		} break;
+		case INS_BNE_REL:	// 2/3(4)
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					SetDataBusFromMemory();
+					BRANCH_CHECK(PS.Bits.Z == 0);
+				});
+		} break;
+		case INS_BEQ_REL:	// 2/3(4)
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					SetDataBusFromMemory();
+					BRANCH_CHECK(PS.Bits.Z == 1);
+				});
+		} break;
+		case INS_BPL_REL:	// 2/3(4)
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					SetDataBusFromMemory();
+					BRANCH_CHECK(PS.Bits.N == 0);
+				});
+		} break;
+		case INS_BMI_REL:	// 2/3(4)
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					SetDataBusFromMemory();
+					BRANCH_CHECK(PS.Bits.N == 1);
+				});
+		} break;
+		case INS_BVC_REL:	// 2/3(4)
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					SetDataBusFromMemory();
+					BRANCH_CHECK(PS.Bits.V == 0);
+				});
+		} break;
+		case INS_BVS_REL:	// 2/3(4)
+		{
+			m_InstructionQueue.push([&]()
+				{
+					AddressBus = PC++;
+					SetDataBusFromMemory();
+					BRANCH_CHECK(PS.Bits.V == 1);
+				});
+		} break;
+
 		//SWITCH_INS(INS_CMP_IM, CMPImmediate)	// Immediate
 		//SWITCH_INS(INS_CMP_ZP, CMPZeroPage)		// Zero Page
 		//SWITCH_INS(INS_CMP_ZPX, CMPZeroPageX) 	// Zero Page X

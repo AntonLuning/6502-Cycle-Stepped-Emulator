@@ -89,13 +89,11 @@
 
 // PHA - Push accumulator
 #define INS_PHA_IMP		((BYTE)0x48)	// Implied
-
-// PHP - Push processor status (PS)
-#define INS_PHP_IMP		((BYTE)0x08)	// Implied
-
 // PLA - Pull accumulator
 #define INS_PLA_IMP		((BYTE)0x68)	// Implied
 
+// PHP - Push processor status (PS)
+#define INS_PHP_IMP		((BYTE)0x08)	// Implied
 // PLP - Pull processor status (PS)
 #define INS_PLP_IMP		((BYTE)0x28)	// Implied
 
@@ -249,25 +247,21 @@
 
 // BCC - Branch on carry clear
 #define INS_BCC_REL		((BYTE)0x90)	// Relative
-
 // BCS - Branch on carry set
 #define INS_BCS_REL		((BYTE)0xB0)	// Relative
 
+// BNE - Branch on not equal (zero clear)
+#define INS_BNE_REL		((BYTE)0xD0)	// Relative
 // BEQ - Branch on equal (zero set)
 #define INS_BEQ_REL		((BYTE)0xF0)	// Relative
 
+// BPL - Branch on plus (negative clear)
+#define INS_BPL_REL		((BYTE)0x10)	// Relative
 // BMI - Branch on minus (negative set)
 #define INS_BMI_REL		((BYTE)0x30)	// Relative
 
-// BNE - Branch on not equal (zero clear)
-#define INS_BNE_REL		((BYTE)0xD0)	// Relative
-
-// BPL - Branch on plus (negative clear)
-#define INS_BPL_REL		((BYTE)0x10)	// Relative
-
 // BVC - Branch on overflow clear
 #define INS_BVC_REL		((BYTE)0x50)	// Relative
-
 // BVS - Branch on overflow set
 #define INS_BVS_REL		((BYTE)0x70)	// Relative
 
@@ -299,15 +293,15 @@
 // BRK - Break / Interrupt
 #define INS_BRK_IMP		((BYTE)0x00)	// Implied
 
+// RTI - Return from interrupt
+#define INS_RTI_IMP		((BYTE)0x40)	// Implied
+
 // JMP - Jump
 #define INS_JMP_ABS		((BYTE)0x4C)	// Absolute
 #define INS_JMP_IND		((BYTE)0x6C)	// Indirect
 
 // JSR - Jump subroutine
 #define INS_JSR_ABS 	((BYTE)0x20)	// Absolute
-
-// RTI - Return from interrupt
-#define INS_RTI_IMP		((BYTE)0x40)	// Implied
 
 // RTS - Return from subroutine
 #define INS_RTS_IMP		((BYTE)0x60)	// Implied
