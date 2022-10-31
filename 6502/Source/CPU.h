@@ -79,20 +79,16 @@ private:
 	void PushAbsoluteModified();
 	void PushAbsoluteXModified();
 
-	void SetA();
-	void StoreA();
-	void SetX();
-	void StoreX();
-	void SetY();
-	void StoreY();
+	void SetRegister(BYTE& reg);
+	void StoreRegister(BYTE& reg);
+	void CompareRegister(BYTE& reg);
 	void AddA();
 	void SubA();
 	void AndA();
 	void OrA();
 	void ExclusiveOrA();
-	void CompareA();
-	void CompareX();
-	void CompareY();
+	void ShiftLeftDB();
+	void ShiftRightDB();
 	void DecDB();
 	void IncDB();
 	void TestBit();
