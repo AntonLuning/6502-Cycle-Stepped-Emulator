@@ -56,10 +56,10 @@ void Clock::SetSpeedMS(float speed)
 	if (m_Speed != 0)
 	{
 		UpdateClock();
-		LOG_INFO("Clock speed set to {0} Hz ({1} ms per cycle)", (uint32_t)(1000 / m_Speed), m_Speed);
+		LOG_INFO("Clock speed set to {0} Hz ({1} ms per cycle).", (uint32_t)(1000 / m_Speed), m_Speed);
 	}
 	else
-		LOG_INFO("Clock speed set to max speed)");
+		LOG_INFO("Clock speed set to max speed.");
 }
 
 void Clock::UpdateClock()

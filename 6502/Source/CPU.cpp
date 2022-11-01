@@ -1058,7 +1058,11 @@ void CPU::LoadInstruction()
 		{
 			m_InstructionQueue.push([&]()
 				{
-					ShiftLeftDB(A, false);					
+					bool setC = (A & BIT(7)) > 0;
+					A <<= 1;
+					PS.Bits.C = setC ? 1 : 0;
+					PS.Bits.Z = A == 0;
+					PS.Bits.N = (A & BIT(7)) > 0;	
 				});
 		} break;
 		case INS_ASL_ZP:	// 5
@@ -1066,7 +1070,7 @@ void CPU::LoadInstruction()
 			PushZeroPageModified();
 			m_InstructionQueue.push([&]()
 				{
-					ShiftLeftDB(DataBus, false);
+					ShiftLeftDB(false);
 				});
 		} break;
 		case INS_ASL_ZPX:	// 6
@@ -1074,7 +1078,7 @@ void CPU::LoadInstruction()
 			PushZeroPageXModified();
 			m_InstructionQueue.push([&]()
 				{
-					ShiftLeftDB(DataBus, false);
+					ShiftLeftDB(false);
 				});
 		} break;
 		case INS_ASL_ABS:	// 6
@@ -1082,7 +1086,7 @@ void CPU::LoadInstruction()
 			PushAbsoluteModified();
 			m_InstructionQueue.push([&]()
 				{
-					ShiftLeftDB(DataBus, false);
+					ShiftLeftDB(false);
 				});
 		} break;
 		case INS_ASL_ABSX:	// 7
@@ -1090,14 +1094,18 @@ void CPU::LoadInstruction()
 			PushAbsoluteXModified();
 			m_InstructionQueue.push([&]()
 				{
-					ShiftLeftDB(DataBus, false);
+					ShiftLeftDB(false);
 				});
 		} break;
 		case INS_LSR_ACC:	// 2
 		{
 			m_InstructionQueue.push([&]()
 				{
-					ShiftRightDB(A, false);
+					bool setC = (A & BIT(0)) > 0;
+					A >>= 1;
+					PS.Bits.C = setC ? 1 : 0;
+					PS.Bits.Z = A == 0;
+					PS.Bits.N = (A & BIT(7)) > 0;
 				});
 		} break;
 		case INS_LSR_ZP:	// 5
@@ -1105,7 +1113,7 @@ void CPU::LoadInstruction()
 			PushZeroPageModified();
 			m_InstructionQueue.push([&]()
 				{
-					ShiftRightDB(DataBus, false);
+					ShiftRightDB(false);
 				});
 		} break;
 		case INS_LSR_ZPX:	// 6
@@ -1113,7 +1121,7 @@ void CPU::LoadInstruction()
 			PushZeroPageXModified();
 			m_InstructionQueue.push([&]()
 				{
-					ShiftRightDB(DataBus, false);
+					ShiftRightDB(false);
 				});
 		} break;
 		case INS_LSR_ABS:	// 6
@@ -1121,7 +1129,7 @@ void CPU::LoadInstruction()
 			PushAbsoluteModified();
 			m_InstructionQueue.push([&]()
 				{
-					ShiftRightDB(DataBus, false);
+					ShiftRightDB(false);
 				});
 		} break;
 		case INS_LSR_ABSX:	// 7
@@ -1129,7 +1137,7 @@ void CPU::LoadInstruction()
 			PushAbsoluteXModified();
 			m_InstructionQueue.push([&]()
 				{
-					ShiftRightDB(DataBus, false);
+					ShiftRightDB(false);
 				});
 		} break;
 	
@@ -1137,7 +1145,13 @@ void CPU::LoadInstruction()
 		{
 			m_InstructionQueue.push([&]()
 				{
-					ShiftLeftDB(A, true);
+					bool setC = (A & BIT(7)) > 0;
+					A <<= 1;
+					if (PS.Bits.C)
+						A |= BIT(0);
+					PS.Bits.C = setC ? 1 : 0;
+					PS.Bits.Z = A == 0;
+					PS.Bits.N = (A & BIT(7)) > 0;
 				});
 		} break;
 		case INS_ROL_ZP:	// 5
@@ -1145,7 +1159,7 @@ void CPU::LoadInstruction()
 			PushZeroPageModified();
 			m_InstructionQueue.push([&]()
 				{
-					ShiftLeftDB(DataBus, true);
+					ShiftLeftDB(true);
 				});
 		} break;
 		case INS_ROL_ZPX:	// 6
@@ -1153,7 +1167,7 @@ void CPU::LoadInstruction()
 			PushZeroPageXModified();
 			m_InstructionQueue.push([&]()
 				{
-					ShiftLeftDB(DataBus, true);
+					ShiftLeftDB(true);
 				});
 		} break;
 		case INS_ROL_ABS:	// 6
@@ -1161,7 +1175,7 @@ void CPU::LoadInstruction()
 			PushAbsoluteModified();
 			m_InstructionQueue.push([&]()
 				{
-					ShiftLeftDB(DataBus, true);
+					ShiftLeftDB(true);
 				});
 		} break;
 		case INS_ROL_ABSX:	// 7
@@ -1169,14 +1183,20 @@ void CPU::LoadInstruction()
 			PushAbsoluteXModified();
 			m_InstructionQueue.push([&]()
 				{
-					ShiftLeftDB(DataBus, true);
+					ShiftLeftDB(true);
 				});
 		} break;
 		case INS_ROR_ACC:	// 2
 		{
 			m_InstructionQueue.push([&]()
 				{
-					ShiftRightDB(A, true);
+					bool setC = (A & BIT(0)) > 0;
+					A >>= 1;
+					if (PS.Bits.C)
+						A |= BIT(7);
+					PS.Bits.C = setC ? 1 : 0;
+					PS.Bits.Z = A == 0;
+					PS.Bits.N = (A & BIT(7)) > 0;
 				});
 		} break;
 		case INS_ROR_ZP:	// 5
@@ -1184,7 +1204,7 @@ void CPU::LoadInstruction()
 			PushZeroPageModified();
 			m_InstructionQueue.push([&]()
 				{
-					ShiftRightDB(DataBus, true);
+					ShiftRightDB(true);
 				});
 		} break;
 		case INS_ROR_ZPX:	// 6
@@ -1192,7 +1212,7 @@ void CPU::LoadInstruction()
 			PushZeroPageXModified();
 			m_InstructionQueue.push([&]()
 				{
-					ShiftRightDB(DataBus, true);
+					ShiftRightDB(true);
 				});
 		} break;
 		case INS_ROR_ABS:	// 6
@@ -1200,7 +1220,7 @@ void CPU::LoadInstruction()
 			PushAbsoluteModified();
 			m_InstructionQueue.push([&]()
 				{
-					ShiftRightDB(DataBus, true);
+					ShiftRightDB(true);
 				});
 		} break;
 		case INS_ROR_ABSX:	// 7
@@ -1208,7 +1228,7 @@ void CPU::LoadInstruction()
 			PushAbsoluteXModified();
 			m_InstructionQueue.push([&]()
 				{
-					ShiftRightDB(DataBus, true);
+					ShiftRightDB(true);
 				});
 		} break;
 #pragma endregion
@@ -1984,28 +2004,28 @@ void CPU::ExclusiveOrA()
 	PS.Bits.N = (A & BIT(7)) > 0;
 }
 
-void CPU::ShiftLeftDB(BYTE& target, bool withC)
+void CPU::ShiftLeftDB(bool withC)
 {
-	bool setC = (target & BIT(7)) > 0;
-	target <<= 1;
+	bool setC = (DataBus & BIT(7)) > 0;
+	DataBus <<= 1;
 	if (withC && PS.Bits.C)
-		target |= BIT(0);
+		DataBus |= BIT(0);
 	WriteMemoryFromDataBus();
 	PS.Bits.C = setC ? 1 : 0;
-	PS.Bits.Z = target == 0;
-	PS.Bits.N = (target & BIT(7)) > 0;
+	PS.Bits.Z = DataBus == 0;
+	PS.Bits.N = (DataBus & BIT(7)) > 0;
 }
 
-void CPU::ShiftRightDB(BYTE& target, bool withC)
+void CPU::ShiftRightDB(bool withC)
 {
-	bool setC = (target & BIT(0)) > 0;
-	target >>= 1;
+	bool setC = (DataBus & BIT(0)) > 0;
+	DataBus >>= 1;
 	if (withC && PS.Bits.C)
-		target |= BIT(7);
+		DataBus |= BIT(7);
 	WriteMemoryFromDataBus();
 	PS.Bits.C = setC ? 1 : 0;
-	PS.Bits.Z = target == 0;
-	PS.Bits.N = (target & BIT(7)) > 0;
+	PS.Bits.Z = DataBus == 0;
+	PS.Bits.N = (DataBus & BIT(7)) > 0;
 }
 
 void CPU::DecDB()

@@ -87,8 +87,8 @@ private:
 	void AndA();
 	void OrA();
 	void ExclusiveOrA();
-	void ShiftLeftDB(BYTE& target, bool withC);
-	void ShiftRightDB(BYTE& target, bool withC);
+	void ShiftLeftDB(bool withC);
+	void ShiftRightDB(bool withC);
 	void DecDB();
 	void IncDB();
 	void TestBit();
