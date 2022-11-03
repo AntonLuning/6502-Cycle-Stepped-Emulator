@@ -235,7 +235,7 @@ TEST_F(CompiledProgramTest, Program7)
 
 	int32_t cycles = RunTestProgram();
 
-	// 12 * 23 = 276
+	// 12 * 23 = 276 = 0x0114
 	EXPECT_EQ(MCU->SRAM->ReadByte(0x3003), 0x14); 
 	EXPECT_EQ(MCU->SRAM->ReadByte(0x3004), 0x01);
 }

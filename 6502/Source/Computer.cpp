@@ -15,11 +15,10 @@ Computer::Computer(uint32_t sizeSRAM, uint32_t sizeEEPROM)
 		LOG_WARN("SRAM and EEPROM have shared memory addresses. This may result in unwanted behaviour.");
 }
 
-void Computer::Reset()
+Computer::~Computer()
 {
-	CPU.Reset();
-	SRAM->Reset();
-	EEPROM->Reset();
+	delete SRAM;
+	delete EEPROM;
 }
 
 void Computer::RunCycle()

@@ -33,8 +33,7 @@ public:
 
 public:
 	Computer(uint32_t sizeSRAM, uint32_t sizeEEPROM);
-	~Computer() = default;
+	~Computer();
 
-	void Reset();
 	void RunCycle();
 };
